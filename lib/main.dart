@@ -30,6 +30,7 @@ class _SampleAppState extends State<SampleApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -217,13 +218,12 @@ class MediaUploadPage extends StatelessWidget {
                       Expanded(child: Divider(color: Color(0xFFEEEEEE), thickness: 1)),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 15),
                   Row(
                     children: [
                       Expanded(
                         child: Container(
-                          height: 36,
-                          alignment: Alignment.center,
+                          height: 60,
                           decoration: BoxDecoration(
                             color: Colors.white,
                             border: Border.all(color: Colors.black, width: 1),
@@ -237,54 +237,59 @@ class MediaUploadPage extends StatelessWidget {
                               ),
                             ],
                           ),
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
-                            child: Text(
-                              "Upload from Files",
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
+                          child: Row(
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.only(left: 16.0),
+                                child: Text(
+                                  "Upload from Files",
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Container(
-                        width: 113,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: Color(0xFFFFB800), // AccentPrimaryColor
-                          border: Border.all(color: Colors.black, width: 1),
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF18191F).withAlpha((0.08 * 255).toInt()),
-                              blurRadius: 0,
-                              spreadRadius: 0,
-                              offset: const Offset(0, 0),
-                            ),
-                          ],
-                        ),
-                        child: TextButton(
-                          onPressed: () {},
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            backgroundColor: Colors.transparent,
-                            foregroundColor: Colors.black,
-                            textStyle: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          child: const Text(
-                            "Browse Files",
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                            ),
+                              const Spacer(),
+                              Container(
+                                width: 130,
+                                height: 36,
+                                margin: const EdgeInsets.only(right: 12),
+                                decoration: BoxDecoration(
+                                  color: Color(0xFFFFB800),
+                                  border: Border.all(color: Colors.black, width: 1),
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(0xFF18191F).withAlpha((0.08 * 255).toInt()),
+                                      blurRadius: 0,
+                                      spreadRadius: 0,
+                                      offset: const Offset(0, 0),
+                                    ),
+                                  ],
+                                ),
+                                child: TextButton(
+                                  onPressed: () {},
+                                  style: TextButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    backgroundColor: Colors.transparent,
+                                    foregroundColor: Colors.black,
+                                    textStyle: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    "Browse Files",
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
