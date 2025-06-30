@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:dotted_border/dotted_border.dart';
 import 'feedback_form_page.dart';
 import 'help_page.dart';
 import 'faq_page.dart';
@@ -161,8 +163,102 @@ class _SampleAppState extends State<SampleApp> {
   }
 }
 
-class MediaUploadPage extends StatelessWidget {
+class MediaUploadPage extends StatefulWidget {
   const MediaUploadPage({super.key});
+  
+  @override
+  State<MediaUploadPage> createState() => _MediaUploadPageState();
+}
+
+class _MediaUploadPageState extends State<MediaUploadPage> {
+  List<PlatformFile> _selectedFiles = [];
+  bool _isUploading = false;
+
+  Future<void> _pickFiles() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+        allowMultiple: true,
+      );
+
+      if (result != null) {
+        setState(() {
+          _selectedFiles.addAll(result.files);
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${result.files.length} file(s) selected'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error picking files: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _removeFile(int index) {
+    setState(() {
+      _selectedFiles.removeAt(index);
+    });
+  }
+
+  Future<void> _uploadFiles() async {
+    if (_selectedFiles.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select files to upload'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isUploading = true;
+    });
+
+    try {
+      // Simulate upload process
+      await Future.delayed(const Duration(seconds: 2));
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${_selectedFiles.length} file(s) uploaded successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      
+      setState(() {
+        _selectedFiles.clear();
+        _isUploading = false;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Upload failed: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      setState(() {
+        _isUploading = false;
+      });
+    }
+  }
+
+  String _formatFileSize(int bytes) {
+    if (bytes <= 0) return "0 B";
+    const suffixes = ["B", "KB", "MB", "GB"];
+    int i = (bytes.bitLength - 1) ~/ 10;
+    return "${(bytes / (1 << (i * 10))).toStringAsFixed(1)} ${suffixes[i]}";
+  }
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -205,9 +301,10 @@ class MediaUploadPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // Dotted border box
-                  DottedBorderBox(),
+                  // Dotted border box with drag and drop
+                  DottedBorderBox(onTap: _pickFiles),
                   const SizedBox(height: 16),
+                  
                   Row(
                     children: const [
                       Expanded(child: Divider(color: Color(0xFFEEEEEE), thickness: 1)),
@@ -268,7 +365,7 @@ class MediaUploadPage extends StatelessWidget {
                                   ],
                                 ),
                                 child: TextButton(
-                                  onPressed: () {},
+                                  onPressed: _pickFiles,
                                   style: TextButton.styleFrom(
                                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                                     shape: RoundedRectangleBorder(
@@ -295,6 +392,100 @@ class MediaUploadPage extends StatelessWidget {
                       ),
                     ],
                   ),
+                  
+                  // Show selected files
+                  if (_selectedFiles.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    const Text(
+                      "Selected Files:",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: _selectedFiles.length,
+                      itemBuilder: (context, index) {
+                        final file = _selectedFiles[index];
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[50],
+                            border: Border.all(color: Colors.grey[300]!),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.picture_as_pdf, color: Colors.red),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      file.name,
+                                      style: const TextStyle(fontWeight: FontWeight.w500),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                    ),
+                                    Text(
+                                      _formatFileSize(file.size),
+                                      style: const TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.close, color: Colors.red),
+                                onPressed: () => _removeFile(index),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    
+                    // Upload button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: _isUploading ? null : _uploadFiles,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFFFB800),
+                          foregroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: _isUploading
+                            ? const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                                    ),
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text("Uploading..."),
+                                ],
+                              )
+                            : Text("Upload ${_selectedFiles.length} file(s)"),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -305,34 +496,44 @@ class MediaUploadPage extends StatelessWidget {
   }
 }
 
-// DottedBorderBox remains the same as before, or use the dotted_border package for a real dotted effect.
-
 class DottedBorderBox extends StatelessWidget {
-  const DottedBorderBox({super.key});
+  final VoidCallback? onTap;
+  
+  const DottedBorderBox({super.key, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 120,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: Colors.black26,
-          style: BorderStyle.solid, // Use a package for dotted if needed
-        ),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
-          Icon(Icons.cloud_upload, size: 40, color: Colors.blue),
-          SizedBox(height: 8),
-          Text("Drag your file(s)"),
-          Text(
-            "Upload in PDF format",
-            style: TextStyle(color: Colors.black54, fontSize: 12),
+    return GestureDetector(
+      onTap: onTap,
+      child: DottedBorder(
+        color: Colors.grey,
+        strokeWidth: 2,
+        dashPattern: const [6, 3],
+        borderType: BorderType.RRect,
+        radius: const Radius.circular(12),
+        child: Container(
+          height: 120,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.grey[50],
+            borderRadius: BorderRadius.circular(12),
           ),
-        ],
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Icon(Icons.cloud_upload, size: 40, color: Colors.blue),
+              SizedBox(height: 8),
+              Text(
+                "Drag your file(s) or click to browse",
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
+              Text(
+                "Upload in PDF format",
+                style: TextStyle(color: Colors.black54, fontSize: 12),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
