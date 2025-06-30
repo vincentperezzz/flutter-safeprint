@@ -18,9 +18,9 @@ class FeedbackFormPage extends StatelessWidget {
           bottom: const PreferredSize(
             preferredSize: Size.fromHeight(36),
             child: TabBar(
-              labelColor: Color(0xFF1A377E),
+              labelColor: Colors.blue,
               unselectedLabelColor: Colors.grey,
-              indicatorColor: Color(0xFF1A377E),
+              indicatorColor: Colors.blue,
               tabs: [
                 Tab(icon: Icon(Icons.comment), text: 'Comments'),
                 Tab(icon: Icon(Icons.report_problem), text: 'Problems'),

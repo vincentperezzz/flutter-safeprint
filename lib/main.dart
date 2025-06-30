@@ -155,7 +155,7 @@ class _SampleAppState extends State<SampleApp> {
             ),
           ],
           currentIndex: _selectedIndex,
-          selectedItemColor: Color(0xFF1A377E),
+          selectedItemColor: Colors.blue,
           onTap: _onItemTapped,
         ),
       ),
