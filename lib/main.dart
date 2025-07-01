@@ -18,12 +18,18 @@ class SampleApp extends StatefulWidget {
 class _SampleAppState extends State<SampleApp> {
   int _selectedIndex = 0;
 
-  static final List<Widget> _pages = <Widget>[
-    MediaUploadPage(),
-    FeedbackFormPage(),
-    HelpPage(),
-    FAQPage(),
-    AboutUsPage(),
+   List<Widget> get _pages => [
+    MediaUploadPage(),        // index 0
+    FeedbackFormPage(),       // index 1
+    HelpPage(),               // index 2
+    FAQPage(),                // index 3  
+    AboutUsPage(              // index 4
+      onNavigate: (int index) {
+        setState(() {
+          _selectedIndex = index;
+        });
+      },
+    ),
   ];
 
   void _onItemTapped(int index) {
