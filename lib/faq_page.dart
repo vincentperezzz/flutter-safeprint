@@ -8,7 +8,7 @@ class FAQPage extends StatefulWidget {
 }
 
 class _FAQPageState extends State<FAQPage> {
-  int? expandedIndex = 0;
+  int? expandedIndex = null;
 
   final faqs = [
     {
@@ -51,13 +51,12 @@ class _FAQPageState extends State<FAQPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
             Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
               color: const Color(0xFFFBB41D),
               borderRadius: BorderRadius.circular(6),
             ),
             child: const Text(
-              'Frequently Asked\nQuestions',
+              'Frequently Asked Questions',
               style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 20,
@@ -69,9 +68,9 @@ class _FAQPageState extends State<FAQPage> {
           const Text(
             "We understand the importance of protecting your documents and ensuring a secure printing experience.\n"
             "Below are some of the ways we safeguard your files and maintain your privacy.",
-            style: TextStyle(fontSize: 12, color: Colors.black87, height: 1.5),
+            style: TextStyle(fontSize: 12, color: Colors.black, height: 1.5),
           ),
-          const SizedBox(height: 40),
+          const SizedBox(height: 24),
           
           // FAQs List
           ListView.builder(
@@ -84,13 +83,13 @@ class _FAQPageState extends State<FAQPage> {
                 duration: const Duration(milliseconds: 200),
                 margin: const EdgeInsets.only(bottom: 24),
                 decoration: BoxDecoration(
-                  color: isExpanded ? const Color(0xFFFBB41D) : Colors.grey[50],
+                  color: isExpanded ? const Color(0xFFFBB41D) : const Color(0xFFF3F3F3),
                   borderRadius: BorderRadius.circular(32),
-                  border: Border.all(color: Colors.black26, width: 1),
+                  border: Border.all(color: Colors.black, width: 1),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.12),
-                      offset: const Offset(4, 8),
+                      color: Colors.black,
+                      offset: const Offset(0, 5),
                       blurRadius: 0,
                       spreadRadius: 0,
                     ),
@@ -111,23 +110,32 @@ class _FAQPageState extends State<FAQPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                (index + 1).toString().padLeft(2, '0'),
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                  color: isExpanded ? Colors.black : Colors.black54,
+                              Baseline(
+                                baseline: 18,
+                                baselineType: TextBaseline.alphabetic,
+                                child: Text(
+                                  (index + 1).toString().padLeft(2, '0'),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                    color: isExpanded ? Colors.black : Colors.black,
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
-                                child: Text(
-                                  faqs[index]['question']!,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
-                                    color: Colors.black,
+                                child: Baseline(
+                                  baseline: 18, // matches fontSize
+                                  baselineType: TextBaseline.alphabetic,
+                                  child: Text(
+                                    faqs[index]['question']!,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                      color: Colors.black,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -135,7 +143,7 @@ class _FAQPageState extends State<FAQPage> {
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   shape: BoxShape.circle,
-                                  border: Border.all(color: Colors.black26),
+                                  border: Border.all(color: Colors.black),
                                 ),
                                 child: Icon(
                                   isExpanded ? Icons.close : Icons.add,
@@ -146,13 +154,13 @@ class _FAQPageState extends State<FAQPage> {
                           ),
                           if (isExpanded) ...[
                             const SizedBox(height: 12),
-                            const Divider(color: Colors.black54, thickness: 1),
+                            const Divider(color: Colors.black, thickness: 1),
                             const SizedBox(height: 8),
                             Text(
                               faqs[index]['answer']!,
                               style: const TextStyle(
                                 fontSize: 12,
-                                color: Colors.black87,
+                                color: Colors.black,
                               ),
                             ),
                           ],

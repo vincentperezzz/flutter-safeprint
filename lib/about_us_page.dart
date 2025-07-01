@@ -64,7 +64,7 @@ class _AboutUsPageState extends State<AboutUsPage> {
                           const Text(
                             "Meet the skilled and experienced team behind\nour successful privacy-focused print management system.",
                             style: TextStyle(
-                              color: Colors.black87,
+                              color: Colors.black,
                               fontSize: 12,
                             ),
                           ),
@@ -90,7 +90,7 @@ class _AboutUsPageState extends State<AboutUsPage> {
                                 const Text(
                                   "SafePrint is a secure and efficient print management system developed as a college capstone project by Crystaline M. Datu, Charles Gabriel D. Gavino, and Vincent P. Perez taking BS Information Technology from Batangas State University The National Engineering University - Alangilan Campus. It aims to improve the printing process by providing a secure file transfer portal between customers and print shops, ensuring that documents are not stored or left behind on shop computers.",
                                   style: TextStyle(
-                                    color: Colors.black87,
+                                    color: Colors.black,
                                     fontSize: 12,
                                     height: 1.5,
                                   ),
