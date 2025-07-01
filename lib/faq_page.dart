@@ -53,7 +53,7 @@ class _FAQPageState extends State<FAQPage> {
             Container(
             decoration: BoxDecoration(
               color: const Color(0xFFFBB41D),
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(8),
             ),
             child: const Text(
               'Frequently Asked Questions',
