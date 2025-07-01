@@ -5,6 +5,7 @@ import 'feedback_form_page.dart';
 import 'help_page.dart';
 import 'faq_page.dart';
 import 'about_us_page.dart';
+import 'uploaded_documents_preview_page.dart';
 
 void main() => runApp(const SampleApp());
 
@@ -229,17 +230,23 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
       // Simulate upload process
       await Future.delayed(const Duration(seconds: 2));
       
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${_selectedFiles.length} file(s) uploaded successfully!'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      // Store the uploaded files
+      final uploadedFiles = List<PlatformFile>.from(_selectedFiles);
       
       setState(() {
         _selectedFiles.clear();
         _isUploading = false;
       });
+
+      // Navigate to uploaded documents preview page
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => UploadedDocumentsPreviewPage(
+            uploadedFiles: uploadedFiles,
+          ),
+        ),
+      );
+      
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
