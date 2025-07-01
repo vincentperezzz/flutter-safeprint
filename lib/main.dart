@@ -19,9 +19,18 @@ class SampleApp extends StatefulWidget {
 class _SampleAppState extends State<SampleApp> {
   int _selectedIndex = 0;
 
-  static final List<Widget> _pages = <Widget>[
-    MediaUploadPage(),
-    FeedbackFormPage(),
+   List<Widget> get _pages => [
+    MediaUploadPage(),        // index 0
+    FeedbackFormPage(),       // index 1
+    HelpPage(),               // index 2
+    FAQPage(),                // index 3  
+    AboutUsPage(              // index 4
+      onNavigate: (int index) {
+        setState(() {
+          _selectedIndex = index;
+        });
+      },
+    ),
   ];
 
   void _onItemTapped(int index) {
@@ -43,33 +52,56 @@ class _SampleAppState extends State<SampleApp> {
           title: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Image.asset(
-                'assets/nanoprint-logo.png',
-                width: 70,
-                height: 70,
-                fit: BoxFit.contain,
-              ),
-              const SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  Text(
-                    "NanoPrint",
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedIndex = 0;
+                  });
+                },
+                child: Row(
+                  children: [
+                    Image.asset(
+                      'assets/nanoprint-logo.png',
+                      width: 70,
+                      height: 70,
+                      fit: BoxFit.contain,
                     ),
-                  ),
-                  Text(
-                    "Powered by SafePrint",
-                    style: TextStyle(
-                      color: Colors.black54,
-                      fontSize: 12,
+                    const SizedBox(width: 8),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFBB41D),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Text(
+                            "NanoPrint",
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE7E7E7),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Text(
+                            "Powered by SafePrint",
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
@@ -82,83 +114,73 @@ class _SampleAppState extends State<SampleApp> {
             ),
           ],
         ),
-        endDrawer: Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              const DrawerHeader(
-                decoration: BoxDecoration(
-                  color: Color(0xFFFBB41D),
+        endDrawer: Builder(
+          builder: (drawerContext) => Drawer(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                const DrawerHeader(
+                  decoration: BoxDecoration(
+                    color: Color(0xFFFBB41D),
+                  ),
+                  child: Text(
+                    'Menu',
+                    style: TextStyle(color: Colors.white, fontSize: 24),
+                  ),
                 ),
-                child: Text(
-                  'Menu',
-                  style: TextStyle(color: Colors.white, fontSize: 24),
-                ),
-              ),
-              Builder(
-                builder: (tileContext) => ListTile(
+                ListTile(
                   leading: const Icon(Icons.help_outline),
                   title: const Text('Help'),
                   onTap: () {
-                    Navigator.of(tileContext).pop();
-                    showDialog(
-                      context: tileContext,
-                      builder: (_) => const Dialog(
-                        child: SizedBox(height: 200, child: HelpPage()),
-                      ),
-                    );
+                    setState(() {
+                      _selectedIndex = 2;
+                    });
+                    Navigator.of(drawerContext).pop();
                   },
                 ),
-              ),
-              Builder(
-                builder: (tileContext) => ListTile(
+                ListTile(
                   leading: const Icon(Icons.question_answer),
                   title: const Text('FAQ'),
                   onTap: () {
-                    Navigator.of(tileContext).pop();
-                    showDialog(
-                      context: tileContext,
-                      builder: (_) => const Dialog(
-                        child: SizedBox(height: 200, child: FAQPage()),
-                      ),
-                    );
+                    setState(() {
+                      _selectedIndex = 3;
+                    });
+                    Navigator.of(drawerContext).pop();
                   },
                 ),
-              ),
-              Builder(
-                builder: (tileContext) => ListTile(
+                ListTile(
                   leading: const Icon(Icons.info_outline),
                   title: const Text('About Us'),
                   onTap: () {
-                    Navigator.of(tileContext).pop();
-                    showDialog(
-                      context: tileContext,
-                      builder: (_) => const Dialog(
-                        child: SizedBox(height: 200, child: AboutUsPage()),
-                      ),
-                    );
+                    setState(() {
+                      _selectedIndex = 4;
+                    });
+                    Navigator.of(drawerContext).pop();
                   },
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
+
         body: _pages[_selectedIndex],
-        bottomNavigationBar: BottomNavigationBar(
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.cloud_upload),
-              label: 'Media Upload',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.feedback),
-              label: 'Feedback Form',
-            ),
-          ],
-          currentIndex: _selectedIndex,
-          selectedItemColor: Colors.blue,
-          onTap: _onItemTapped,
-        ),
+        bottomNavigationBar: (_selectedIndex == 0 || _selectedIndex == 1)
+          ? BottomNavigationBar(
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.cloud_upload),
+                  label: 'Media Upload',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.feedback),
+                  label: 'Feedback Form',
+                ),
+              ],
+              currentIndex: _selectedIndex,
+              selectedItemColor: Colors.blue,
+              onTap: _onItemTapped,
+            )
+          : null,
       ),
     );
   }
@@ -355,7 +377,7 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
                               ),
                               const Spacer(),
                               Container(
-                                width: 130,
+                                width: 120,
                                 height: 36,
                                 margin: const EdgeInsets.only(right: 12),
                                 decoration: BoxDecoration(
