@@ -73,13 +73,13 @@ class _AboutUsPageState extends State<AboutUsPage> {
                             width: double.infinity,
                             padding: const EdgeInsets.all(28),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFE6F0FF),
+                              color: const Color(0xFFE4EFFF),
                               borderRadius: BorderRadius.circular(32),
-                              border: Border.all(color: Colors.black26, width: 1),
+                              border: Border.all(color: Colors.black, width: 1),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.08),
-                                  offset: const Offset(4, 8),
+                                  color: Colors.black,
+                                  offset: const Offset(0, 5),
                                   blurRadius: 0,
                                   spreadRadius: 0,
                                 ),
@@ -174,7 +174,7 @@ class _AboutUsPageState extends State<AboutUsPage> {
 
                           // Contact Us
                           Container(
-                            key: _contactKey, // <-- Key for scrolling
+                            key: _contactKey,
                             decoration: BoxDecoration(
                               color: const Color(0xFFFBB41D),
                               borderRadius: BorderRadius.circular(8),
