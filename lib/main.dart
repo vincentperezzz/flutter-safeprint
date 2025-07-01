@@ -51,33 +51,56 @@ class _SampleAppState extends State<SampleApp> {
           title: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Image.asset(
-                'assets/nanoprint-logo.png',
-                width: 70,
-                height: 70,
-                fit: BoxFit.contain,
-              ),
-              const SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  Text(
-                    "NanoPrint",
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedIndex = 0;
+                  });
+                },
+                child: Row(
+                  children: [
+                    Image.asset(
+                      'assets/nanoprint-logo.png',
+                      width: 70,
+                      height: 70,
+                      fit: BoxFit.contain,
                     ),
-                  ),
-                  Text(
-                    "Powered by SafePrint",
-                    style: TextStyle(
-                      color: Colors.black54,
-                      fontSize: 12,
+                    const SizedBox(width: 8),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFBB41D),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Text(
+                            "NanoPrint",
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE7E7E7),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Text(
+                            "Powered by SafePrint",
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
@@ -347,7 +370,7 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
                               ),
                               const Spacer(),
                               Container(
-                                width: 130,
+                                width: 120,
                                 height: 36,
                                 margin: const EdgeInsets.only(right: 12),
                                 decoration: BoxDecoration(

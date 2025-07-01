@@ -155,7 +155,7 @@ class _AboutUsPageState extends State<AboutUsPage> {
                                   ),
                                   Container(
                                     decoration: BoxDecoration(
-                                      color: Colors.white70,
+                                      color: Color(0xFFE7E7E7),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: const Text(
