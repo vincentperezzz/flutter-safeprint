@@ -434,7 +434,7 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
                         fontSize: 16,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 10),
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
@@ -445,24 +445,64 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
                           margin: const EdgeInsets.only(bottom: 8),
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.grey[50],
+                            color: Colors.white,
                             border: Border.all(color: Colors.grey[300]!),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              const Icon(Icons.picture_as_pdf, color: Colors.red),
-                              const SizedBox(width: 12),
+                              // PDF Icon
+                              Container(
+                                width: 40,
+                                height: 40,
+                                child: Stack(
+                                  alignment: Alignment.bottomLeft,
+                                  children: [
+                                    // Document outline icon
+                                    Icon(Icons.insert_drive_file_outlined, color: Colors.grey[300], size: 40),
+                                    // PDF label
+                                    Positioned(
+                                      left: 0,
+                                      bottom: 9,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 2),
+                                        decoration: BoxDecoration(
+                                          color: Colors.red,
+                                          borderRadius: BorderRadius.circular(4),
+                                        ),
+                                        child: const Text(
+                                          'PDF',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 10,
+                                            letterSpacing: 0.5,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              // File name and size
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
                                       file.name,
-                                      style: const TextStyle(fontWeight: FontWeight.w500),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15,
+                                        color: Colors.black,
+                                      ),
                                       overflow: TextOverflow.ellipsis,
                                       maxLines: 1,
                                     ),
+                                    const SizedBox(height: 2),
                                     Text(
                                       _formatFileSize(file.size),
                                       style: const TextStyle(
@@ -473,47 +513,65 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
                                   ],
                                 ),
                               ),
-                              IconButton(
-                                icon: const Icon(Icons.close, color: Colors.red),
-                                onPressed: () => _removeFile(index),
+                              const SizedBox(width: 6),
+                              // Remove button
+                              InkWell(
+                                onTap: () => _removeFile(index),
+                                borderRadius: BorderRadius.circular(16),
+                                child: Container(
+                                  width: 22,
+                                  height: 22,
+                                  decoration: BoxDecoration(
+                                    color: Colors.transparent,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: Colors.red, width: 2),
+                                  ),
+                                  child: const Icon(Icons.close, color: Colors.red, size: 18),
+                                ),
                               ),
                             ],
                           ),
                         );
                       },
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 10),
                     
                     // Upload button
                     SizedBox(
                       width: double.infinity,
                       height: 50,
-                      child: ElevatedButton(
-                        onPressed: _isUploading ? null : _uploadFiles,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFFB800),
-                          foregroundColor: Colors.black,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black,
+                              blurRadius: 0,
+                              spreadRadius: 0,
+                              offset: const Offset(0, 5),
+                            ),
+                          ],
                         ),
-                        child: _isUploading
-                            ? const Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
-                                    ),
-                                  ),
-                                  SizedBox(width: 8),
-                                  Text("Uploading..."),
-                                ],
-                              )
-                            : Text("Upload ${_selectedFiles.length} file(s)"),
+                        child: ElevatedButton(
+                          onPressed: _isUploading ? null : _uploadFiles,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Colors.black,
+                            disabledBackgroundColor: Colors.white, // <-- add this
+                            disabledForegroundColor: Colors.black.withOpacity(0.38), // <-- add this
+                            elevation: 0,
+                            shadowColor: Colors.transparent,
+                            side: const BorderSide(color: Colors.black, width: 1),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            textStyle: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                          child: Text(_isUploading ? "Uploading..." : "Proceed"),
+                        ),
                       ),
                     ),
                   ],
@@ -537,8 +595,8 @@ class DottedBorderBox extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: DottedBorder(
-        color: Colors.grey,
-        strokeWidth: 2,
+        color: Colors.black,
+        strokeWidth: 1.5,
         dashPattern: const [6, 3],
         borderType: BorderType.RRect,
         radius: const Radius.circular(12),
