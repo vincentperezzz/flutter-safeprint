@@ -11,6 +11,7 @@ class HelpPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
+            padding: const EdgeInsets.symmetric(horizontal: 5),
             decoration: BoxDecoration(
               color: const Color(0xFFFBB41D),
               borderRadius: BorderRadius.circular(8),
@@ -35,19 +36,19 @@ class HelpPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(24),
             margin: const EdgeInsets.only(bottom: 32),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF3F3F3),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: Colors.black, width: 1),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black,
-                  offset: const Offset(0, 5),
-                  blurRadius: 0,
-                  spreadRadius: 0,
-                ),
-              ],
-            ),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF3F3F3),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: Colors.black, width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black,
+                    offset: const Offset(0, 5),
+                    blurRadius: 0,
+                    spreadRadius: 0,
+                  ),
+                ],
+              ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -61,6 +62,7 @@ class HelpPage extends StatelessWidget {
                     children: [
                       WidgetSpan(
                         child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 5),
                             decoration: BoxDecoration(
                               color: const Color(0xFFFBB41D),
                               borderRadius: BorderRadius.circular(8),
@@ -124,7 +126,8 @@ class HelpPage extends StatelessWidget {
                     ),
                     children: [
                       WidgetSpan(
-                        child: Container(
+                        child: Container(                          
+                          padding: const EdgeInsets.symmetric(horizontal: 5),
                             decoration: BoxDecoration(
                               color: const Color(0xFFFBB41D),
                               borderRadius: BorderRadius.circular(8),
@@ -188,7 +191,8 @@ class HelpPage extends StatelessWidget {
                     ),
                     children: [
                       WidgetSpan(
-                        child: Container(
+                        child: Container(                          
+                          padding: const EdgeInsets.symmetric(horizontal: 5),
                             decoration: BoxDecoration(
                               color: const Color(0xFFFBB41D),
                               borderRadius: BorderRadius.circular(8),
@@ -253,6 +257,7 @@ class HelpPage extends StatelessWidget {
                     children: [
                       WidgetSpan(
                         child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 5),
                             decoration: BoxDecoration(
                               color: const Color(0xFFFBB41D),
                               borderRadius: BorderRadius.circular(8),
@@ -316,7 +321,8 @@ class HelpPage extends StatelessWidget {
                     ),
                     children: [
                       WidgetSpan(
-                        child: Container(
+                        child: Container(                          
+                          padding: const EdgeInsets.symmetric(horizontal: 5),
                             decoration: BoxDecoration(
                               color: const Color(0xFFFBB41D),
                               borderRadius: BorderRadius.circular(8),
@@ -380,7 +386,8 @@ class HelpPage extends StatelessWidget {
                     ),
                     children: [
                       WidgetSpan(
-                        child: Container(
+                        child: Container(                          
+                          padding: const EdgeInsets.symmetric(horizontal: 5),
                             decoration: BoxDecoration(
                               color: const Color(0xFFFBB41D),
                               borderRadius: BorderRadius.circular(8),

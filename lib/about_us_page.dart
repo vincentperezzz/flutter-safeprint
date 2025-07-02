@@ -46,7 +46,8 @@ class _AboutUsPageState extends State<AboutUsPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
+                          Container(                            
+                            padding: const EdgeInsets.symmetric(horizontal: 5),
                             decoration: BoxDecoration(
                               color: const Color(0xFFFBB41D),
                               borderRadius: BorderRadius.circular(8),
