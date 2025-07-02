@@ -464,7 +464,7 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
                                     // PDF label
                                     Positioned(
                                       left: 0,
-                                      bottom: 9,
+                                      bottom: 10,
                                       child: Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 2),
                                         decoration: BoxDecoration(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'payment_page.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 
 class UploadedDocumentsPreviewPage extends StatefulWidget {
   final List<PlatformFile> uploadedFiles;
@@ -30,6 +31,7 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
         backgroundColor: Colors.white,
         elevation: 0,
         toolbarHeight: 70,
+        automaticallyImplyLeading: false,
         title: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -104,47 +106,71 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                       ),
                     ),
                     const SizedBox(height: 20),
-                    
+
                     // Documents list
-                    ...widget.uploadedFiles.map((file) => DocumentPreviewItem(
-                      fileName: file.name,
-                      fileSize: _formatFileSize(file.size),
-                    )),
-                    
-                    const SizedBox(height: 20),
-                    
+                    ...widget.uploadedFiles.asMap().entries.map((entry) {
+                      final i = entry.key;
+                      final file = entry.value;
+                      return DocumentPreviewItem(
+                        fileName: file.name,
+                        fileSize: _formatFileSize(file.size),
+                        onRemove: () {
+                          setState(() {
+                            widget.uploadedFiles.removeAt(i);
+                          });
+                          if (widget.uploadedFiles.isEmpty) {
+                            Navigator.of(context).pop(); // Go back to previous (main) page
+                          }
+                        },
+                      );
+                    }),
+                    const SizedBox(height: 10),
+
                     // Proceed button
                     SizedBox(
                       width: double.infinity,
                       height: 50,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // Calculate total amount (₱45.00 for 2 documents as shown in image)
-                          double totalAmount = 45.00;
-                          
-                          // Navigate to payment page
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => PaymentPage(
-                                uploadedFiles: widget.uploadedFiles,
-                                totalAmount: totalAmount,
-                              ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black,
+                              blurRadius: 0,
+                              spreadRadius: 0,
+                              offset: const Offset(0, 5), // <-- match Upload button
                             ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                          ],
                         ),
-                        child: const Text(
-                          "Proceed",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            double totalAmount = 45.00;
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => PaymentPage(
+                                  uploadedFiles: widget.uploadedFiles,
+                                  totalAmount: totalAmount,
+                                ),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Colors.black,
+                            disabledBackgroundColor: Colors.white, // <-- match Upload button
+                            disabledForegroundColor: Colors.black.withOpacity(0.38), // <-- match Upload button
+                            elevation: 0,
+                            shadowColor: Colors.transparent,
+                            side: const BorderSide(color: Colors.black, width: 1),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            textStyle: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
                           ),
+                          child: const Text("Proceed"),
                         ),
                       ),
                     ),
@@ -162,11 +188,13 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
 class DocumentPreviewItem extends StatefulWidget {
   final String fileName;
   final String fileSize;
+  final VoidCallback onRemove;
 
   const DocumentPreviewItem({
     super.key,
     required this.fileName,
     required this.fileSize,
+    required this.onRemove,
   });
 
   @override
@@ -178,7 +206,7 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
   String pagesSelection = "All Pages";
   String orientation = "Portrait";
   bool grayscale = false;
-  String paperSize = "Auto (8.5x13in)";
+  String paperSize = "Long (8.5×13in)";
   String paperQuality = "70 GSM (thinner)";
 
   @override
@@ -187,8 +215,8 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
-        border: Border.all(color: Colors.grey[300]!),
+        color: Colors.white,
+        border: Border.all(color: Colors.black),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -197,18 +225,56 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
           // File info header
           Row(
             children: [
-              const Icon(Icons.picture_as_pdf, color: Colors.red, size: 24),
-              const SizedBox(width: 12),
+              // PDF Icon
+              Container(
+                width: 40,
+                height: 40,
+                child: Stack(
+                  alignment: Alignment.bottomLeft,
+                  children: [
+                    Icon(Icons.insert_drive_file_outlined, color: Colors.grey[300], size: 40),
+                    Positioned(
+                      left: 0,
+                      bottom: 10,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Text(
+                          'PDF',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 10,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 6),
+
+              // File name and size
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       widget.fileName,
-                      style: const TextStyle(fontWeight: FontWeight.w500),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        color: Colors.black,
+                      ),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                     ),
+                    const SizedBox(height: 2),
                     Text(
                       widget.fileSize,
                       style: const TextStyle(
@@ -219,179 +285,314 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
                   ],
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.close, color: Colors.red),
-                onPressed: () {
-                  // Handle remove file
-                },
+              const SizedBox(width: 6),
+              // Remove button
+              InkWell(
+                onTap: widget.onRemove,
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  width: 22,
+                  height: 22,
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.red, width: 2),
+                  ),
+                  child: const Icon(Icons.close, color: Colors.red, size: 18),
+                ),
               ),
             ],
           ),
-          
-          const SizedBox(height: 16),
-          
+          const SizedBox(height: 12),
+
           // Copies
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text("Copies", style: TextStyle(fontWeight: FontWeight.w500)),
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: copies > 1 ? () => setState(() => copies--) : null,
-                    icon: const Icon(Icons.remove),
-                    iconSize: 20,
-                  ),
-                  Container(
-                    width: 40,
-                    height: 30,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFB800),
-                      borderRadius: BorderRadius.circular(4),
+              Container(
+                height: 32,
+                width: 110,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.black, width: 1),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Minus button
+                    SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        icon: const Text(
+                          '−', // Unicode minus
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black,
+                            height: 1,
+                          ),
+                        ),
+                        onPressed: copies > 1 ? () => setState(() => copies--) : null,
+                        splashRadius: 18,
+                      ),
                     ),
-                    child: Text(
-                      copies.toString(),
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    // Yellow number box
+                    Container(
+                      width: 40,
+                      height: 32,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFB800),
+                        border: Border(
+                          left: BorderSide(color: Colors.black, width: 1),
+                          right: BorderSide(color: Colors.black, width: 1),
+                        ),
+                      ),
+                      child: Text(
+                        copies.toString(),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.black,
+                        ),
+                      ),
                     ),
-                  ),
-                  IconButton(
-                    onPressed: () => setState(() => copies++),
-                    icon: const Icon(Icons.add),
-                    iconSize: 20,
-                  ),
-                ],
+                    // Plus button
+                    SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        icon: const Text(
+                          '+',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black,
+                            height: 1,
+                          ),
+                        ),
+                        onPressed: () => setState(() => copies++),
+                        splashRadius: 18,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
-          
-          const SizedBox(height: 12),
-          
+          const SizedBox(height: 16),
+
           // Pages to Print
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          const Text("Pages to Print", style: TextStyle(fontWeight: FontWeight.w500)),
+          const SizedBox(height: 6),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text("Pages to Print", style: TextStyle(fontWeight: FontWeight.w500)),
-              Row(
-                children: [
-                  _buildRadioOption("All Pages", pagesSelection == "All Pages", (value) {
-                    setState(() => pagesSelection = "All Pages");
-                  }),
-                  const SizedBox(width: 16),
-                  _buildRadioOption("Specific Pages", pagesSelection == "Specific Pages", (value) {
-                    setState(() => pagesSelection = "Specific Pages");
-                  }),
-                ],
+              _buildRadioOption("All Pages", pagesSelection == "All Pages", (value) {
+                setState(() => pagesSelection = "All Pages");
+              }),
+              const SizedBox(height: 6),
+              _buildRadioOption("Specific Pages", pagesSelection == "Specific Pages", (value) {
+                setState(() => pagesSelection = "Specific Pages");
+              }),
+              const SizedBox(height: 10),
+              // Page range box
+              Container(
+                width: double.infinity,
+                height: 38,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: pagesSelection == "Specific Pages"
+                      ? Colors.white
+                      : const Color(0xFFF6F6FF),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: Colors.black, width: 1),
+                ),
+                child: pagesSelection == "Specific Pages"
+                    ? TextField(
+                        enabled: true,
+                        textAlign: TextAlign.center,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintStyle: TextStyle(
+                            color: Colors.grey[500],
+                            fontWeight: FontWeight.w500,
+                            fontSize: 16,
+                          ),
+                          isCollapsed: true,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 16,
+                        ),
+                      )
+                    : Text(
+                        "1-3",
+                        style: TextStyle(
+                          color: Colors.grey[400],
+                          fontWeight: FontWeight.w500,
+                          fontSize: 16,
+                        ),
+                      ),
               ),
             ],
           ),
-          
-          const SizedBox(height: 8),
-          
-          // Page range input
-          Container(
-            width: double.infinity,
-            height: 40,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey[300]!),
-            ),
-            alignment: Alignment.centerLeft,
-            child: const Text("1-5", style: TextStyle(color: Colors.grey)),
-          ),
-          
-          const SizedBox(height: 12),
-          
+          const SizedBox(height: 16),
+
           // Orientation
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          const Text("Page Orientation", style: TextStyle(fontWeight: FontWeight.w500)),
+          const SizedBox(height: 6),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text("Orientation", style: TextStyle(fontWeight: FontWeight.w500)),
-              Row(
-                children: [
-                  _buildRadioOption("Portrait", orientation == "Portrait", (value) {
-                    setState(() => orientation = "Portrait");
-                  }),
-                  const SizedBox(width: 16),
-                  _buildRadioOption("Landscape", orientation == "Landscape", (value) {
-                    setState(() => orientation = "Landscape");
-                  }),
-                ],
-              ),
+              _buildRadioOption("Portrait", orientation == "Portrait", (value) {
+                setState(() => orientation = "Portrait");
+              }),
+              const SizedBox(height: 6),
+              _buildRadioOption("Landscape", orientation == "Landscape", (value) {
+                setState(() => orientation = "Landscape");
+              }),
             ],
           ),
-          
-          const SizedBox(height: 12),
-          
+          const SizedBox(height: 16),
+
           // Print in Grayscale
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text("Print in Grayscale", style: TextStyle(fontWeight: FontWeight.w500)),
-              Switch(
-                value: grayscale,
-                onChanged: (value) => setState(() => grayscale = value),
-                activeColor: const Color(0xFFFFB800),
-              ),
+              _customToggle(grayscale, (val) => setState(() => grayscale = val)),
             ],
           ),
-          
-          const SizedBox(height: 12),
-          
+
+          const SizedBox(height: 14),
+
           // Paper Size
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text("Paper Size", style: TextStyle(fontWeight: FontWeight.w500)),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          const Text("Paper Size", style: TextStyle(fontWeight: FontWeight.w500)),
+          const SizedBox(height: 6),
+          DropdownButtonHideUnderline(
+            child: DropdownButton2<String>(
+              isExpanded: true,
+              value: paperSize,
+              items: [
+                "Long (8.5×13in)",
+                "Letter (8.5×11in)",
+                "A4 (8.3×11.7in)"
+              ].map((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(
+                    value,
+                    style: const TextStyle(color: Colors.black, fontSize: 15)),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                if (newValue != null) {
+                  setState(() => paperSize = newValue);
+                }
+              },
+              buttonStyleData: ButtonStyleData(
+                height: 44,
+                width: double.infinity,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFB800),
-                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
                   border: Border.all(color: Colors.black),
                 ),
-                child: DropdownButton<String>(
-                  value: paperSize,
-                  underline: const SizedBox(),
-                  icon: const Icon(Icons.keyboard_arrow_down),
-                  items: [
-                    "Auto (8.5x13in)",
-                    "A4",
-                    "Letter",
-                    "Legal"
-                  ].map((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    if (newValue != null) {
-                      setState(() => paperSize = newValue);
-                    }
-                  },
+                padding: const EdgeInsets.only(left: 12, right: 0),
+              ),
+              iconStyleData: IconStyleData(
+                icon: Container(
+                  width: 44,
+                  height: double.infinity,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFFB800),
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(14),
+                      bottomRight: Radius.circular(14),
+                    ),
+                  ),
+                  child: const Icon(Icons.keyboard_arrow_down, color: Colors.black),
                 ),
               ),
-            ],
+              dropdownStyleData: DropdownStyleData(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.black, width: 1),
+                ),
+                elevation: 2,
+              ),
+              menuItemStyleData: MenuItemStyleData(
+                height: 44
+              ),
+            ),
           ),
-          
-          const SizedBox(height: 12),
-          
+          const SizedBox(height: 16),
+
           // Quality of the Paper
           const Text("Quality of the Paper", style: TextStyle(fontWeight: FontWeight.w500)),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: _buildQualityButton("70 GSM (thinner)", paperQuality == "70 GSM (thinner)"),
+          const SizedBox(height: 6),
+          DropdownButtonHideUnderline(
+            child: DropdownButton2<String>(
+              isExpanded: true,
+              value: paperQuality,
+              items: [
+                "70 GSM (thinner)",
+                "80 GSM (thicker)"
+              ].map((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value, style: const TextStyle(color: Colors.black, fontSize: 15)),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                if (newValue != null) {
+                  setState(() => paperQuality = newValue);
+                }
+              },
+              buttonStyleData: ButtonStyleData(
+                height: 44,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: Colors.black),
+                ),
+                padding: const EdgeInsets.only(left: 12, right: 0),
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _buildQualityButton("80 GSM (thicker)", paperQuality == "80 GSM (thicker)"),
+              iconStyleData: IconStyleData(
+                icon: Container(
+                  width: 44,
+                  height: double.infinity,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFFB800),
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(14),
+                      bottomRight: Radius.circular(14),
+                    ),
+        )          ,
+                child: const Icon(Icons.keyboard_arrow_down, color: Colors.black),
+                ),
               ),
-            ],
+              dropdownStyleData: DropdownStyleData(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.black, width: 1),
+                ),
+                elevation: 2,
+              ),
+              menuItemStyleData: MenuItemStyleData(
+                height: 44,
+              ),
+            ),
           ),
         ],
       ),
@@ -399,39 +600,70 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
   }
 
   Widget _buildRadioOption(String title, bool isSelected, Function(bool) onChanged) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Radio<bool>(
-          value: true,
-          groupValue: isSelected,
-          onChanged: (value) => onChanged(value ?? false),
-          activeColor: const Color(0xFFFFB800),
-        ),
-        Text(title, style: const TextStyle(fontSize: 12)),
-      ],
+    return GestureDetector(
+      onTap: () => onChanged(true),
+      child: Row(
+        children: [
+          Container(
+            width: 22,
+            height: 22,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.black, width: 1),
+              color: Colors.white,
+            ),
+            child: isSelected
+                ? Center(
+                    child: Container(
+                      width: 14,
+                      height: 14,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFFFB800),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  )
+                : null,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 15, color: Colors.black),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildQualityButton(String text, bool isSelected) {
+  Widget _customToggle(bool value, ValueChanged<bool> onChanged) {
     return GestureDetector(
-      onTap: () => setState(() => paperQuality = text),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      onTap: () => onChanged(!value),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        width: 44,
+        height: 24,
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFFFB800) : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isSelected ? Colors.black : Colors.grey[400]!,
-          ),
+          color: value ? const Color(0xFFFFB800) : Colors.white, // Yellow when ON
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.black, width: 1),
         ),
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            fontSize: 12,
-          ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            AnimatedAlign(
+              duration: const Duration(milliseconds: 150),
+              alignment: value ? Alignment.centerRight : Alignment.centerLeft,
+              child: Container(
+                width: 22,
+                height: 22,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.black, width: 1),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
