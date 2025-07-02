@@ -72,6 +72,7 @@ class _SampleAppState extends State<SampleApp> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 5),
                           decoration: BoxDecoration(
                             color: const Color(0xFFFBB41D),
                             borderRadius: BorderRadius.circular(8),
@@ -86,6 +87,7 @@ class _SampleAppState extends State<SampleApp> {
                           ),
                         ),
                         Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 5),
                           decoration: BoxDecoration(
                             color: const Color(0xFFE7E7E7),
                             borderRadius: BorderRadius.circular(8),
@@ -169,7 +171,7 @@ class _SampleAppState extends State<SampleApp> {
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: Icon(Icons.cloud_upload),
-                  label: 'Media Upload',
+                  label: 'File Upload',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.feedback),
@@ -315,7 +317,7 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    "Media Upload",
+                    "File Upload",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
@@ -376,26 +378,26 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
                                 ),
                               ),
                               const Spacer(),
-                              Container(
+                                Container(
                                 width: 120,
                                 height: 36,
                                 margin: const EdgeInsets.only(right: 12),
-                                decoration: BoxDecoration(
-                                  color: Color(0xFFFFB800),
-                                  border: Border.all(color: Colors.black, width: 1),
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: const Color(0xFF18191F).withAlpha((0.08 * 255).toInt()),
-                                      blurRadius: 0,
-                                      spreadRadius: 0,
-                                      offset: const Offset(0, 0),
-                                    ),
-                                  ],
-                                ),
-                                child: TextButton(
-                                  onPressed: _pickFiles,
-                                  style: TextButton.styleFrom(
+                                  decoration: BoxDecoration(
+                                    color: Color(0xFFFFB800),
+                                    border: Border.all(color: Colors.black, width: 1),
+                                    borderRadius: BorderRadius.circular(12),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black,
+                                        blurRadius: 0,
+                                        spreadRadius: 0,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ],
+                                  ),
+                                  child: TextButton(
+                                    onPressed: _pickFiles,
+                                    style: TextButton.styleFrom(
                                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
@@ -405,8 +407,8 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
                                     textStyle: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                     ),
-                                  ),
-                                  child: const Text(
+                                    ),
+                                    child: const Text(
                                     "Browse Files",
                                     style: TextStyle(
                                       color: Colors.black,
