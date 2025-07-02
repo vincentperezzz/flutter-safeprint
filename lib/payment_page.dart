@@ -39,8 +39,8 @@ class _PaymentPageState extends State<PaymentPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Feedback Sent'),
-          content: const Text('Thank you for your feedback!'),
+          title: const Text('Thank you!'),
+          content: const Text('Your feedback has been sent.'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -65,6 +65,7 @@ class _PaymentPageState extends State<PaymentPage> {
         backgroundColor: Colors.white,
         elevation: 0,
         toolbarHeight: 70,
+        automaticallyImplyLeading: false,
         title: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -131,48 +132,40 @@ class _PaymentPageState extends State<PaymentPage> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Thank you message
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[50],
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey[300]!),
+                    // Thank you message (no container)
+                      const Text(
+                        "Thank you! Please approach to our personnel for payment.",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Thank you! Please approach to our personnel for payment.",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          const Text(
-                            "Please provide your Customer ID to our personnel",
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
+                      const SizedBox(height: 8),
+                      const Text(
+                        "Please provide your Customer ID to our personnel",
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 12,
+                        ),
                       ),
-                    ),
-                    
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 14),
                     
                     // Customer ID
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF90EE90),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                        color: const Color(0xFFC6FF8A),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.green),
-                      ),
+                        border: Border.all(color: Colors.black),
+                        boxShadow: [
+                          BoxShadow(
+                          color: Colors.black,
+                          blurRadius: 0,
+                          offset: const Offset(0, 5),
+                          ),
+                        ],
+                        ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
@@ -180,51 +173,59 @@ class _PaymentPageState extends State<PaymentPage> {
                             "Customer ID",
                             style: TextStyle(
                               fontWeight: FontWeight.w500,
-                              fontSize: 14,
+                              fontSize: 20,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             _generateCustomerId(),
                             style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 30,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
                     
                     // Your Document ID
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: Colors.grey[50],
+                        color: const Color(0xFFFFE6E6),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey[300]!),
+                        border: Border.all(color: Colors.black),
+                        boxShadow: [
+                          BoxShadow(
+                          color: Colors.black,
+                          blurRadius: 0,
+                          offset: const Offset(0, 5),
+                          ),
+                        ],
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
                             children: [
-                              Container(
+                                Container(
                                 width: 40,
                                 height: 40,
-                                decoration: BoxDecoration(
-                                  color: Colors.orange,
+                                child: ClipRRect(
                                   borderRadius: BorderRadius.circular(20),
+                                  child: Image.asset(
+                                  'assets/avatar.png',
+                                  fit: BoxFit.cover,
+                                  ),
                                 ),
-                                child: const Icon(Icons.person, color: Colors.white),
                               ),
-                              const SizedBox(width: 12),
+                              const SizedBox(width: 10),
                               const Text(
-                                "Your Document ID",
+                                "Your Documents",
                                 style: TextStyle(
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w500,
                                   fontSize: 16,
                                 ),
                               ),
@@ -238,7 +239,7 @@ class _PaymentPageState extends State<PaymentPage> {
                             final file = entry.value;
                             return Container(
                               margin: const EdgeInsets.only(bottom: 8),
-                              padding: const EdgeInsets.all(12),
+                              padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(8),
@@ -246,15 +247,45 @@ class _PaymentPageState extends State<PaymentPage> {
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.picture_as_pdf, color: Colors.red),
-                                  const SizedBox(width: 12),
+                                  // PDF Icon
+                                  Container(
+                                    width: 40,
+                                    height: 40,
+                                    child: Stack(
+                                      alignment: Alignment.bottomLeft,
+                                      children: [
+                                        Icon(Icons.insert_drive_file_outlined, color: Colors.grey[300], size: 40),
+                                        Positioned(
+                                          left: 0,
+                                          bottom: 10,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 2),
+                                            decoration: BoxDecoration(
+                                              color: Colors.red,
+                                              borderRadius: BorderRadius.circular(4),
+                                            ),
+                                            child: const Text(
+                                              'PDF',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 10,
+                                                letterSpacing: 0.5,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           file.name,
-                                          style: const TextStyle(fontWeight: FontWeight.w500),
+                                          style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
                                           overflow: TextOverflow.ellipsis,
                                           maxLines: 1,
                                         ),
@@ -267,11 +298,12 @@ class _PaymentPageState extends State<PaymentPage> {
                                         ),
                                       ],
                                     ),
-                                  ),
+                                  ),                                  
+                                  const SizedBox(width: 6),
                                   Text(
                                     _generateDocumentId(file.name, index),
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
+                                    style: const TextStyle(                                      
+                                      fontWeight: FontWeight.w500,
                                       fontSize: 14,
                                     ),
                                   ),
@@ -281,18 +313,17 @@ class _PaymentPageState extends State<PaymentPage> {
                           }),
                         ],
                       ),
-                    ),
-                    
-                    const SizedBox(height: 16),
+                    ),                  
+                    const SizedBox(height: 20),
                     
                     // Amount to Pay
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFB800),
+                        color: const Color(0xFFFBB41D),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.orange),
+                        border: Border.all(color: Colors.black),
                       ),
                       child: Column(
                         children: [
@@ -300,7 +331,7 @@ class _PaymentPageState extends State<PaymentPage> {
                             "₱${widget.totalAmount.toStringAsFixed(2)}",
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 32,
+                              fontSize: 30,
                               color: Colors.black,
                             ),
                           ),
@@ -321,54 +352,45 @@ class _PaymentPageState extends State<PaymentPage> {
                     // Feedback Section
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(18),
+                      margin: const EdgeInsets.only(bottom: 16),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF20B2AA),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.teal),
+                        color: const Color(0xFF00c6ae),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.black),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black,
+                            blurRadius: 0,
+                            spreadRadius: 0,
+                            offset: const Offset(0, 5),
+                          ),
+                        ],
                       ),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Row(
-                            children: [
-                              const Expanded(
-                                child: Text(
-                                  "How was your Experience?",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                width: 60,
-                                height: 60,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(30),
-                                ),
-                                child: const Icon(
-                                  Icons.person,
-                                  size: 40,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
                           const Text(
-                            "Your review means a lot to us!",
+                            "How was your experience?",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                              color: Colors.black,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 6),
+                          const Text(
+                            "Your review meant a lot to us!",
                             style: TextStyle(
                               fontSize: 14,
-                              color: Colors.white70,
+                              color: Colors.black87,
                             ),
+                            textAlign: TextAlign.center,
                           ),
-                          const SizedBox(height: 12),
-                          
-                          // Star Rating
+                          const SizedBox(height: 6),
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: List.generate(5, (index) {
                               return GestureDetector(
                                 onTap: () {
@@ -377,19 +399,17 @@ class _PaymentPageState extends State<PaymentPage> {
                                   });
                                 },
                                 child: Icon(
-                                  Icons.star,
+                                  index < selectedStars ? Icons.star : Icons.star_border,
                                   size: 30,
-                                  color: index < selectedStars ? Colors.orange : Colors.white,
+                                  color: index < selectedStars ? const Color(0xFFFBB41D) : Colors.black,
                                 ),
                               );
                             }),
                           ),
-                          
                           const SizedBox(height: 12),
-                          
-                          // Send Feedback Button
                           SizedBox(
-                            height: 40,
+                            width: 160,
+                            height: 44,
                             child: ElevatedButton(
                               onPressed: _sendFeedback,
                               style: ElevatedButton.styleFrom(
@@ -398,40 +418,51 @@ class _PaymentPageState extends State<PaymentPage> {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                              ),
-                              child: const Text(
-                                "Send a Feedback",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
+                                textStyle: const TextStyle(
+                                  fontSize: 14,
                                 ),
+                                elevation: 0,
                               ),
+                              child: const Text("Send a Feedback"),
                             ),
                           ),
                         ],
                       ),
-                    ),
+                    ),                    
+                    const SizedBox(height: 6),
                     
-                    const SizedBox(height: 16),
-                    
-                    // Upload Another Document Button
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: _uploadAnotherDocument,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          side: const BorderSide(color: Colors.black),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                    // Finish Transaction
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black,
+                            blurRadius: 0,
+                            spreadRadius: 0,
+                            offset: const Offset(0, 5),
                           ),
-                        ),
-                        child: const Text(
-                          "Upload another Document",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                        ],
+                      ),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: ElevatedButton(
+                          onPressed: _uploadAnotherDocument,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Colors.black,
+                            side: const BorderSide(color: Colors.black),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            "Finish Transaction",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 20,
+                            ),
                           ),
                         ),
                       ),
