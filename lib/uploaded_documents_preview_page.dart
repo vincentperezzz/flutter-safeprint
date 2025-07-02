@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'payment_page.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'appbar_drawer.dart';
 
 class UploadedDocumentsPreviewPage extends StatefulWidget {
   final List<PlatformFile> uploadedFiles;
@@ -27,53 +28,12 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        toolbarHeight: 70,
-        automaticallyImplyLeading: false,
-        title: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Image.asset(
-              'assets/nanoprint-logo.png',
-              width: 70,
-              height: 70,
-              fit: BoxFit.contain,
-            ),
-            const SizedBox(width: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Text(
-                  "NanoPrint",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                ),
-                Text(
-                  "Powered by SafePrint",
-                  style: TextStyle(
-                    color: Colors.black54,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        actions: [
-          Builder(
-            builder: (context) => IconButton(
-              icon: const Icon(Icons.menu, color: Colors.black),
-              onPressed: () => Scaffold.of(context).openEndDrawer(),
-            ),
-          ),
-        ],
-      ),
+      appBar: buildNanoPrintAppBar(() {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      }),
+      endDrawer: buildNanoPrintDrawer(context, (int index) {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      }),
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
@@ -138,14 +98,14 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                               color: Colors.black,
                               blurRadius: 0,
                               spreadRadius: 0,
-                              offset: const Offset(0, 5), // <-- match Upload button
+                              offset: const Offset(0, 5),
                             ),
                           ],
                         ),
                         child: ElevatedButton(
                           onPressed: () {
                             double totalAmount = 45.00;
-                            Navigator.of(context).push(
+                            Navigator.of(context).pushReplacement(
                               MaterialPageRoute(
                                 builder: (context) => PaymentPage(
                                   uploadedFiles: widget.uploadedFiles,
@@ -157,8 +117,8 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,
                             foregroundColor: Colors.black,
-                            disabledBackgroundColor: Colors.white, // <-- match Upload button
-                            disabledForegroundColor: Colors.black.withOpacity(0.38), // <-- match Upload button
+                            disabledBackgroundColor: Colors.white,
+                            disabledForegroundColor: Colors.black,
                             elevation: 0,
                             shadowColor: Colors.transparent,
                             side: const BorderSide(color: Colors.black, width: 1),

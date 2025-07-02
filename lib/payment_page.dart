@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'appbar_drawer.dart';
 
 class PaymentPage extends StatefulWidget {
   final List<PlatformFile> uploadedFiles;
@@ -61,53 +62,12 @@ class _PaymentPageState extends State<PaymentPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        toolbarHeight: 70,
-        automaticallyImplyLeading: false,
-        title: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Image.asset(
-              'assets/nanoprint-logo.png',
-              width: 70,
-              height: 70,
-              fit: BoxFit.contain,
-            ),
-            const SizedBox(width: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Text(
-                  "NanoPrint",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                ),
-                Text(
-                  "Powered by SafePrint",
-                  style: TextStyle(
-                    color: Colors.black54,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        actions: [
-          Builder(
-            builder: (context) => IconButton(
-              icon: const Icon(Icons.menu, color: Colors.black),
-              onPressed: () => Scaffold.of(context).openEndDrawer(),
-            ),
-          ),
-        ],
-      ),
+      appBar: buildNanoPrintAppBar(() {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      }),
+      endDrawer: buildNanoPrintDrawer(context, (int index) {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      }),
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
