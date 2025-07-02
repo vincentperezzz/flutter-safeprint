@@ -485,7 +485,7 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
                                   ],
                                 ),
                               ),
-                              const SizedBox(width: 10),
+                              const SizedBox(width: 6),
                               // File name and size
                               Expanded(
                                 child: Column(
@@ -557,8 +557,8 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,
                             foregroundColor: Colors.black,
-                            disabledBackgroundColor: Colors.white, // <-- add this
-                            disabledForegroundColor: Colors.black.withOpacity(0.38), // <-- add this
+                            disabledBackgroundColor: Colors.white,
+                            disabledForegroundColor: Colors.black,
                             elevation: 0,
                             shadowColor: Colors.transparent,
                             side: const BorderSide(color: Colors.black, width: 1),
@@ -566,7 +566,7 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             textStyle: const TextStyle(
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w800,
                               fontSize: 18,
                             ),
                           ),

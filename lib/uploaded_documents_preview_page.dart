@@ -257,7 +257,6 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
                 ),
               ),
               const SizedBox(width: 6),
-
               // File name and size
               Expanded(
                 child: Column(
