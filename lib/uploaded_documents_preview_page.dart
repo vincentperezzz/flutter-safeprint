@@ -17,6 +17,8 @@ class UploadedDocumentsPreviewPage extends StatefulWidget {
 }
 
 class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewPage> {
+  bool _isLoading = false;
+
   String _formatFileSize(int bytes) {
     if (bytes <= 0) return "0 B";
     const suffixes = ["B", "KB", "MB", "GB"];
@@ -103,17 +105,28 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                           ],
                         ),
                         child: ElevatedButton(
-                          onPressed: () {
-                            double totalAmount = 45.00;
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(
-                                builder: (context) => PaymentPage(
-                                  uploadedFiles: widget.uploadedFiles,
-                                  totalAmount: totalAmount,
-                                ),
-                              ),
-                            );
-                          },
+                          onPressed: _isLoading
+                              ? null
+                              : () async {
+                                  setState(() {
+                                    _isLoading = true;
+                                  });
+                                  double totalAmount = 45.00;
+                                  await Future.delayed(const Duration(milliseconds: 600));
+                                  if (mounted) {
+                                    Navigator.of(context).pushReplacement(
+                                      MaterialPageRoute(
+                                        builder: (context) => PaymentPage(
+                                          uploadedFiles: widget.uploadedFiles,
+                                          totalAmount: totalAmount,
+                                        ),
+                                      ),
+                                    );
+                                    setState(() {
+                                      _isLoading = false;
+                                    });
+                                  }
+                                },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,
                             foregroundColor: Colors.black,
@@ -130,7 +143,16 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                               fontSize: 18,
                             ),
                           ),
-                          child: const Text("Proceed"),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    color: Color(0xFFFBB41D),
+                                    strokeWidth: 3,
+                                  ),
+                                )
+                              : const Text("Proceed"),
                         ),
                       ),
                     ),
@@ -536,8 +558,8 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
                       topRight: Radius.circular(14),
                       bottomRight: Radius.circular(14),
                     ),
-        )          ,
-                child: const Icon(Icons.keyboard_arrow_down, color: Colors.black),
+                  ),
+                  child: const Icon(Icons.keyboard_arrow_down, color: Colors.black),
                 ),
               ),
               dropdownStyleData: DropdownStyleData(

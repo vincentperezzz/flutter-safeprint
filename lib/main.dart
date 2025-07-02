@@ -570,7 +570,16 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
                               fontSize: 18,
                             ),
                           ),
-                          child: Text(_isUploading ? "Uploading..." : "Proceed"),
+                          child: _isUploading
+                              ? const SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    color: Color(0xFFFBB41D),
+                                    strokeWidth: 3,
+                                  ),
+                                )
+                              : const Text("Proceed"),
                         ),
                       ),
                     ),
