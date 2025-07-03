@@ -18,9 +18,17 @@ class PaymentPage extends StatefulWidget {
 
 class _PaymentPageState extends State<PaymentPage> {
   int selectedStars = 0;
+  late final String _customerId;
+
+  @override
+  void initState() {
+    super.initState();
+    _customerId = _generateCustomerId();
+  }
 
   String _generateCustomerId() {
-    return "#CID-${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}";
+    String ms = DateTime.now().millisecondsSinceEpoch.toString();
+    return "#CID-${ms.substring(ms.length - 4)}";
   }
 
   String _generateDocumentId(String fileName, int index) {
@@ -138,7 +146,7 @@ class _PaymentPageState extends State<PaymentPage> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            _generateCustomerId(),
+                             _customerId,
                             style: const TextStyle(
                               fontWeight: FontWeight.w800,
                               fontSize: 30,
