@@ -72,47 +72,79 @@ PreferredSizeWidget buildNanoPrintAppBar(VoidCallback onLogoTap) {
 }
 
 Widget buildNanoPrintDrawer(BuildContext context, void Function(int) onNav) {
-  return Theme(
-    data: Theme.of(context).copyWith(
-      canvasColor: Colors.white, // Forces Drawer background to white
-    ),
-    child: Drawer(
+  return Drawer(
+    backgroundColor: Colors.white,
+    child: Material(
+      color: Colors.white,
       child: SafeArea(
-        child: ListView(
-          padding: EdgeInsets.zero,
+        child: Column(
           children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: const BoxDecoration(
                 color: Color(0xFFFBB41D),
               ),
-              child: Text(
+              child: const Text(
                 'Menu',
-                style: TextStyle(color: Colors.white, fontSize: 24),
+                style: TextStyle(
+                  color: Colors.black, 
+                  fontSize: 24, 
+                  fontWeight: FontWeight.bold
+                ),
               ),
             ),
-            ListTile(
-              leading: const Icon(Icons.help_outline),
-              title: const Text('Help'),
-              onTap: () {
-                onNav(2);
-                Navigator.of(context).pop();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.question_answer),
-              title: const Text('FAQ'),
-              onTap: () {
-                onNav(3);
-                Navigator.of(context).pop();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.info_outline),
-              title: const Text('About Us'),
-              onTap: () {
-                onNav(4);
-                Navigator.of(context).pop();
-              },
+            Expanded(
+              child: Container(
+                color: Colors.white,
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    Container(
+                      color: Colors.white,
+                      child: ListTile(
+                        leading: const Icon(Icons.help_outline, color: Colors.black),
+                        title: const Text(
+                          'Help', 
+                          style: TextStyle(color: Colors.black, fontSize: 16)
+                        ),
+                        onTap: () {
+                          Navigator.of(context).pop();
+                          onNav(2);
+                        },
+                      ),
+                    ),
+                    Container(
+                      color: Colors.white,
+                      child: ListTile(
+                        leading: const Icon(Icons.question_answer, color: Colors.black),
+                        title: const Text(
+                          'FAQ', 
+                          style: TextStyle(color: Colors.black, fontSize: 16)
+                        ),
+                        onTap: () {
+                          Navigator.of(context).pop();
+                          onNav(3);
+                        },
+                      ),
+                    ),
+                    Container(
+                      color: Colors.white,
+                      child: ListTile(
+                        leading: const Icon(Icons.info_outline, color: Colors.black),
+                        title: const Text(
+                          'About Us', 
+                          style: TextStyle(color: Colors.black, fontSize: 16)
+                        ),
+                        onTap: () {
+                          Navigator.of(context).pop();
+                          onNav(4);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),

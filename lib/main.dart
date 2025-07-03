@@ -43,6 +43,18 @@ class _SampleAppState extends State<SampleApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        scaffoldBackgroundColor: Colors.white,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
+          elevation: 0,
+        ),
+        drawerTheme: const DrawerThemeData(
+          backgroundColor: Colors.white,
+        ),
+      ),
       home: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
