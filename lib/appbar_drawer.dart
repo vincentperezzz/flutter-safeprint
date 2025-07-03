@@ -77,11 +77,10 @@ Widget buildNanoPrintDrawer(BuildContext context, void Function(int) onNav) {
     child: Material(
       color: Colors.white,
       child: SafeArea(
-        child: Column(
+        child: ListView(
+          padding: EdgeInsets.zero,
           children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
+            DrawerHeader(
               decoration: const BoxDecoration(
                 color: Color(0xFFFBB41D),
               ),
@@ -94,56 +93,46 @@ Widget buildNanoPrintDrawer(BuildContext context, void Function(int) onNav) {
                 ),
               ),
             ),
-            Expanded(
-              child: Container(
-                color: Colors.white,
-                child: ListView(
-                  padding: EdgeInsets.zero,
-                  children: [
-                    Container(
-                      color: Colors.white,
-                      child: ListTile(
-                        leading: const Icon(Icons.help_outline, color: Colors.black),
-                        title: const Text(
-                          'Help', 
-                          style: TextStyle(color: Colors.black, fontSize: 16)
-                        ),
-                        onTap: () {
-                          Navigator.of(context).pop();
-                          onNav(2);
-                        },
-                      ),
-                    ),
-                    Container(
-                      color: Colors.white,
-                      child: ListTile(
-                        leading: const Icon(Icons.question_answer, color: Colors.black),
-                        title: const Text(
-                          'FAQ', 
-                          style: TextStyle(color: Colors.black, fontSize: 16)
-                        ),
-                        onTap: () {
-                          Navigator.of(context).pop();
-                          onNav(3);
-                        },
-                      ),
-                    ),
-                    Container(
-                      color: Colors.white,
-                      child: ListTile(
-                        leading: const Icon(Icons.info_outline, color: Colors.black),
-                        title: const Text(
-                          'About Us', 
-                          style: TextStyle(color: Colors.black, fontSize: 16)
-                        ),
-                        onTap: () {
-                          Navigator.of(context).pop();
-                          onNav(4);
-                        },
-                      ),
-                    ),
-                  ],
+            Container(
+              color: Colors.white,
+              child: ListTile(
+                leading: const Icon(Icons.help_outline, color: Colors.black),
+                title: const Text(
+                  'Help', 
+                  style: TextStyle(color: Colors.black, fontSize: 16)
                 ),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  onNav(2);
+                },
+              ),
+            ),
+            Container(
+              color: Colors.white,
+              child: ListTile(
+                leading: const Icon(Icons.question_answer, color: Colors.black),
+                title: const Text(
+                  'FAQ', 
+                  style: TextStyle(color: Colors.black, fontSize: 16)
+                ),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  onNav(3);
+                },
+              ),
+            ),
+            Container(
+              color: Colors.white,
+              child: ListTile(
+                leading: const Icon(Icons.info_outline, color: Colors.black),
+                title: const Text(
+                  'About Us', 
+                  style: TextStyle(color: Colors.black, fontSize: 16)
+                ),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  onNav(4);
+                },
               ),
             ),
           ],
