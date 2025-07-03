@@ -24,6 +24,14 @@ class _AboutUsPageState extends State<AboutUsPage> {
     }
   }
 
+  void _scrollToTop() {
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -243,9 +251,7 @@ class _AboutUsPageState extends State<AboutUsPage> {
                                 if (widget.onNavigate != null) widget.onNavigate!(3);
                               }),
                               const SizedBox(height: 8),
-                              _FooterLink('About Us', onTap: () {
-                                if (widget.onNavigate != null) widget.onNavigate!(4);
-                              }),
+                              _FooterLink('About Us', onTap: _scrollToTop),
                               const SizedBox(height: 8),
                               _FooterLink('Feedback', onTap: () {
                                 if (widget.onNavigate != null) widget.onNavigate!(1);
