@@ -140,7 +140,8 @@ class _AboutUsPageState extends State<AboutUsPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const SizedBox(height: 12),
-                                  Container(
+                                  Container(                                    
+                                    padding: const EdgeInsets.symmetric(horizontal: 5),
                                     decoration: BoxDecoration(
                                       color: const Color(0xFFFBB41D),
                                       borderRadius: BorderRadius.circular(8),
@@ -154,7 +155,8 @@ class _AboutUsPageState extends State<AboutUsPage> {
                                       ),
                                     ),
                                   ),
-                                  Container(
+                                  Container(                                    
+                                    padding: const EdgeInsets.symmetric(horizontal: 5),
                                     decoration: BoxDecoration(
                                       color: Color(0xFFE7E7E7),
                                       borderRadius: BorderRadius.circular(8),
@@ -175,7 +177,8 @@ class _AboutUsPageState extends State<AboutUsPage> {
 
                           // Contact Us
                           Container(
-                            key: _contactKey,
+                            key: _contactKey,                            
+                            padding: const EdgeInsets.symmetric(horizontal: 5),
                             decoration: BoxDecoration(
                               color: const Color(0xFFFBB41D),
                               borderRadius: BorderRadius.circular(8),
