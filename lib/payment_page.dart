@@ -178,7 +178,7 @@ class _PaymentPageState extends State<PaymentPage> {
                         children: [
                           Row(
                             children: [
-                                Container(
+                                SizedBox(
                                 width: 40,
                                 height: 40,
                                 child: ClipRRect(
@@ -216,7 +216,7 @@ class _PaymentPageState extends State<PaymentPage> {
                               child: Row(
                                 children: [
                                   // PDF Icon
-                                  Container(
+                                  SizedBox(
                                     width: 40,
                                     height: 40,
                                     child: Stack(

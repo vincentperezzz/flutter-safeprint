@@ -208,7 +208,7 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
           Row(
             children: [
               // PDF Icon
-              Container(
+              SizedBox(
                 width: 40,
                 height: 40,
                 child: Stack(

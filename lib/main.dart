@@ -465,7 +465,7 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               // PDF Icon
-                              Container(
+                              SizedBox(
                                 width: 40,
                                 height: 40,
                                 child: Stack(
