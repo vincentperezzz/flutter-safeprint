@@ -50,7 +50,7 @@ class _FAQPageState extends State<FAQPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-            Container(              
+          Container(
             padding: const EdgeInsets.symmetric(horizontal: 5),
             decoration: BoxDecoration(
               color: const Color(0xFFFBB41D),
@@ -59,9 +59,10 @@ class _FAQPageState extends State<FAQPage> {
             child: const Text(
               'Frequently Asked Questions',
               style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-              color: Colors.black,
+                fontFamily: 'SpaceGrotesk',
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+                color: Colors.black,
               ),
             ),
           ),
@@ -69,10 +70,15 @@ class _FAQPageState extends State<FAQPage> {
           const Text(
             "We understand the importance of protecting your documents and ensuring a secure printing experience.\n"
             "Below are some of the ways we safeguard your files and maintain your privacy.",
-            style: TextStyle(fontSize: 12, color: Colors.black, height: 1.5),
+            style: TextStyle(
+              fontFamily: 'SpaceGrotesk',
+              fontSize: 12,
+              color: Colors.black,
+              height: 1.5,
+            ),
           ),
           const SizedBox(height: 24),
-          
+
           // FAQs List
           ListView.builder(
             shrinkWrap: true,
@@ -119,6 +125,7 @@ class _FAQPageState extends State<FAQPage> {
                                 child: Text(
                                   (index + 1).toString().padLeft(2, '0'),
                                   style: TextStyle(
+                                    fontFamily: 'SpaceGrotesk',
                                     fontWeight: FontWeight.bold,
                                     fontSize: 18,
                                     color: isExpanded ? Colors.black : Colors.black,
@@ -133,6 +140,7 @@ class _FAQPageState extends State<FAQPage> {
                                   child: Text(
                                     faqs[index]['question']!,
                                     style: const TextStyle(
+                                      fontFamily: 'SpaceGrotesk',
                                       fontWeight: FontWeight.bold,
                                       fontSize: 18,
                                       color: Colors.black,
@@ -160,6 +168,7 @@ class _FAQPageState extends State<FAQPage> {
                             Text(
                               faqs[index]['answer']!,
                               style: const TextStyle(
+                                fontFamily: 'SpaceGrotesk',
                                 fontSize: 12,
                                 color: Colors.black,
                               ),
