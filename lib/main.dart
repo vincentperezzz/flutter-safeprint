@@ -93,8 +93,9 @@ class _SampleAppState extends State<SampleApp> {
                             "NanoPrint",
                             style: TextStyle(
                               color: Colors.black,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w800,
                               fontSize: 20,
+                              fontFamily: 'SpaceGrotesk',
                             ),
                           ),
                         ),
@@ -108,7 +109,9 @@ class _SampleAppState extends State<SampleApp> {
                             "Powered by SafePrint",
                             style: TextStyle(
                               color: Colors.black,
+                              fontWeight: FontWeight.w500,
                               fontSize: 12,
+                              fontFamily: 'SpaceGrotesk',
                             ),
                           ),
                         ),
@@ -139,12 +142,23 @@ class _SampleAppState extends State<SampleApp> {
                   ),
                   child: Text(
                     'Menu',
-                    style: TextStyle(color: Colors.white, fontSize: 24),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontFamily: 'SpaceGrotesk',
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
                 ListTile(
                   leading: const Icon(Icons.help_outline),
-                  title: const Text('Help'),
+                  title: const Text(
+                    'Help',
+                    style: TextStyle(
+                      fontFamily: 'SpaceGrotesk',
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                   onTap: () {
                     setState(() {
                       _selectedIndex = 2;
@@ -154,7 +168,13 @@ class _SampleAppState extends State<SampleApp> {
                 ),
                 ListTile(
                   leading: const Icon(Icons.question_answer),
-                  title: const Text('FAQ'),
+                  title: const Text(
+                    'FAQs',
+                    style: TextStyle(
+                      fontFamily: 'SpaceGrotesk',
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                   onTap: () {
                     setState(() {
                       _selectedIndex = 3;
@@ -164,7 +184,13 @@ class _SampleAppState extends State<SampleApp> {
                 ),
                 ListTile(
                   leading: const Icon(Icons.info_outline),
-                  title: const Text('About Us'),
+                  title: const Text(
+                    'About Us',
+                    style: TextStyle(
+                      fontFamily: 'SpaceGrotesk',
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                   onTap: () {
                     setState(() {
                       _selectedIndex = 4;
@@ -193,6 +219,14 @@ class _SampleAppState extends State<SampleApp> {
               currentIndex: _selectedIndex,
               selectedItemColor: Colors.blue,
               onTap: _onItemTapped,
+              selectedLabelStyle: const TextStyle(
+                fontFamily: 'SpaceGrotesk',
+                fontWeight: FontWeight.w700,
+              ),
+              unselectedLabelStyle: const TextStyle(
+                fontFamily: 'SpaceGrotesk',
+                fontWeight: FontWeight.w600,
+              ),
             )
           : null,
       ),
@@ -331,16 +365,19 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
                   const Text(
                     "File Upload",
                     style: TextStyle(
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w800,
                       fontSize: 18,
+                      fontFamily: 'SpaceGrotesk',
                     ),
                   ),
                   const SizedBox(height: 4),
                   const Text(
                     "Add your documents here",
                     style: TextStyle(
-                      color: Colors.black54,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w500,
                       fontSize: 14,
+                      fontFamily: 'SpaceGrotesk',
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -353,7 +390,14 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
                       Expanded(child: Divider(color: Color(0xFFEEEEEE), thickness: 1)),
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Text("OR", style: TextStyle(color: Colors.black54)),
+                        child: Text(
+                          "OR",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontFamily: 'SpaceGrotesk',
+                            fontWeight: FontWeight.w500,
+                          )
+                        ),
                       ),
                       Expanded(child: Divider(color: Color(0xFFEEEEEE), thickness: 1)),
                     ],
@@ -385,13 +429,14 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
                                   "Upload from Files",
                                   style: TextStyle(
                                     color: Colors.black,
-                                    fontWeight: FontWeight.bold,
+                                    fontWeight: FontWeight.w800,
+                                    fontFamily: 'Montserrat',
                                   ),
                                 ),
                               ),
                               const Spacer(),
                                 Container(
-                                width: 120,
+                                width: 130,
                                 height: 36,
                                 margin: const EdgeInsets.only(right: 12),
                                   decoration: BoxDecoration(
@@ -424,7 +469,8 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
                                     "Browse Files",
                                     style: TextStyle(
                                       color: Colors.black,
-                                      fontWeight: FontWeight.bold,
+                                      fontWeight: FontWeight.w900,
+                                      fontFamily: 'Montserrat',
                                     ),
                                   ),
                                 ),
@@ -634,12 +680,18 @@ class DottedBorderBox extends StatelessWidget {
               Icon(Icons.cloud_upload, size: 40, color: Colors.blue),
               SizedBox(height: 8),
               Text(
-                "Drag your file(s) or click to browse",
-                style: TextStyle(fontWeight: FontWeight.w500),
+                "Drag your file(s)",
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'Inter',
+                ),
               ),
               Text(
-                "Upload in PDF format",
-                style: TextStyle(color: Colors.black54, fontSize: 12),
+                "Upload in PDF files",
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'Inter',
+                ),
               ),
             ],
           ),
