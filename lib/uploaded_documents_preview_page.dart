@@ -63,7 +63,8 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                     const Text(
                       "Uploaded Documents Preview",
                       style: TextStyle(
-                        fontWeight: FontWeight.bold,
+                        fontFamily: 'SpaceGrotesk',
+                        fontWeight: FontWeight.w700,
                         fontSize: 18,
                       ),
                     ),
@@ -139,7 +140,8 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                               borderRadius: BorderRadius.circular(12),
                             ),
                             textStyle: const TextStyle(
-                              fontWeight: FontWeight.bold,
+                              fontFamily: 'SpaceGrotesk',
+                              fontWeight: FontWeight.w900,
                               fontSize: 18,
                             ),
                           ),
@@ -152,7 +154,10 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                                     strokeWidth: 3,
                                   ),
                                 )
-                              : const Text("Proceed"),
+                              : const Text(
+                                  "Proceed",
+                                  style: TextStyle(fontFamily: 'SpaceGrotesk'),
+                                ),
                         ),
                       ),
                     ),
@@ -227,6 +232,7 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
                         child: const Text(
                           'PDF',
                           style: TextStyle(
+                            fontFamily: 'SpaceGrotesk',
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                             fontSize: 10,
@@ -248,7 +254,8 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
                     Text(
                       widget.fileName,
                       style: const TextStyle(
-                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w600,
                         fontSize: 15,
                         color: Colors.black,
                       ),
@@ -259,6 +266,7 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
                     Text(
                       widget.fileSize,
                       style: const TextStyle(
+                        fontFamily: 'SpaceGrotesk',
                         color: Colors.grey,
                         fontSize: 12,
                       ),
@@ -290,7 +298,13 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text("Copies", style: TextStyle(fontWeight: FontWeight.w500)),
+              const Text(
+                "Copies",
+                style: TextStyle(
+                  fontFamily: 'SpaceGrotesk',
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               Container(
                 height: 32,
                 width: 110,
@@ -311,6 +325,7 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
                         icon: const Text(
                           '−', // Unicode minus
                           style: TextStyle(
+                            fontFamily: 'SpaceGrotesk',
                             fontSize: 22,
                             fontWeight: FontWeight.w700,
                             color: Colors.black,
@@ -336,6 +351,7 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
                       child: Text(
                         copies.toString(),
                         style: const TextStyle(
+                          fontFamily: 'SpaceGrotesk',
                           fontSize: 16,
                           color: Colors.black,
                         ),
@@ -350,6 +366,7 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
                         icon: const Text(
                           '+',
                           style: TextStyle(
+                            fontFamily: 'SpaceGrotesk',
                             fontSize: 22,
                             fontWeight: FontWeight.w700,
                             color: Colors.black,
@@ -368,7 +385,13 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
           const SizedBox(height: 16),
 
           // Pages to Print
-          const Text("Pages to Print", style: TextStyle(fontWeight: FontWeight.w500)),
+          const Text(
+            "Pages to Print",
+            style: TextStyle(
+              fontFamily: 'SpaceGrotesk',
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           const SizedBox(height: 6),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -400,6 +423,7 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
                         decoration: InputDecoration(
                           border: InputBorder.none,
                           hintStyle: TextStyle(
+                            fontFamily: 'SpaceGrotesk',
                             color: Colors.grey[500],
                             fontWeight: FontWeight.w500,
                             fontSize: 16,
@@ -408,6 +432,7 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
                           contentPadding: EdgeInsets.zero,
                         ),
                         style: const TextStyle(
+                          fontFamily: 'SpaceGrotesk',
                           color: Colors.black,
                           fontWeight: FontWeight.w500,
                           fontSize: 16,
@@ -416,6 +441,7 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
                     : Text(
                         "1-3",
                         style: TextStyle(
+                          fontFamily: 'SpaceGrotesk',
                           color: Colors.grey[400],
                           fontWeight: FontWeight.w500,
                           fontSize: 16,
@@ -427,7 +453,13 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
           const SizedBox(height: 16),
 
           // Orientation
-          const Text("Page Orientation", style: TextStyle(fontWeight: FontWeight.w500)),
+          const Text(
+            "Page Orientation",
+            style: TextStyle(
+              fontFamily: 'SpaceGrotesk',
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           const SizedBox(height: 6),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -447,7 +479,13 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text("Print in Grayscale", style: TextStyle(fontWeight: FontWeight.w500)),
+              const Text(
+                "Print in Grayscale",
+                style: TextStyle(
+                  fontFamily: 'SpaceGrotesk',
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               _customToggle(grayscale, (val) => setState(() => grayscale = val)),
             ],
           ),
@@ -455,7 +493,13 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
           const SizedBox(height: 14),
 
           // Paper Size
-          const Text("Paper Size", style: TextStyle(fontWeight: FontWeight.w500)),
+          const Text(
+            "Paper Size",
+            style: TextStyle(
+              fontFamily: 'SpaceGrotesk',
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           const SizedBox(height: 6),
           DropdownButtonHideUnderline(
             child: DropdownButton2<String>(
@@ -470,7 +514,12 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
                   value: value,
                   child: Text(
                     value,
-                    style: const TextStyle(color: Colors.black, fontSize: 15)),
+                    style: const TextStyle(
+                      fontFamily: 'SpaceGrotesk',
+                      color: Colors.black,
+                      fontSize: 15,
+                    ),
+                  ),
                 );
               }).toList(),
               onChanged: (String? newValue) {
@@ -518,7 +567,13 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
           const SizedBox(height: 16),
 
           // Quality of the Paper
-          const Text("Quality of the Paper", style: TextStyle(fontWeight: FontWeight.w500)),
+          const Text(
+            "Quality of the Paper",
+            style: TextStyle(
+              fontFamily: 'SpaceGrotesk',
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           const SizedBox(height: 6),
           DropdownButtonHideUnderline(
             child: DropdownButton2<String>(
@@ -530,7 +585,14 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
               ].map((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
-                  child: Text(value, style: const TextStyle(color: Colors.black, fontSize: 15)),
+                  child: Text(
+                    value,
+                    style: const TextStyle(
+                      fontFamily: 'SpaceGrotesk',
+                      color: Colors.black,
+                      fontSize: 15,
+                    ),
+                  ),
                 );
               }).toList(),
               onChanged: (String? newValue) {
@@ -609,7 +671,11 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
           const SizedBox(width: 8),
           Text(
             title,
-            style: const TextStyle(fontSize: 15, color: Colors.black),
+            style: const TextStyle(
+              fontFamily: 'SpaceGrotesk',
+              fontSize: 15,
+              color: Colors.black,
+            ),
           ),
         ],
       ),

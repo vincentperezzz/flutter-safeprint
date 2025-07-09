@@ -35,25 +35,18 @@ class _PaymentPageState extends State<PaymentPage> {
     return "#DOC-${1001 + index}";
   }
 
-  String _formatFileSize(int bytes) {
-    if (bytes <= 0) return "0 B";
-    const suffixes = ["B", "KB", "MB", "GB"];
-    int i = (bytes.bitLength - 1) ~/ 10;
-    return "${(bytes / (1 << (i * 10))).toStringAsFixed(1)} ${suffixes[i]}";
-  }
-
   void _sendFeedback() {
     // Handle feedback submission
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Thank you!'),
-          content: const Text('Your feedback has been sent.'),
+          title: const Text('Thank you!', style: TextStyle(fontFamily: 'SpaceGrotesk', fontWeight: FontWeight.w700)),
+          content: const Text('Your feedback has been sent.', style: TextStyle(fontFamily: 'SpaceGrotesk', fontWeight: FontWeight.w500)),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
+              child: const Text('OK', style: TextStyle(fontFamily: 'SpaceGrotesk')),
             ),
           ],
         );
@@ -101,54 +94,58 @@ class _PaymentPageState extends State<PaymentPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Thank you message (no container)
-                      const Text(
-                        "Thank you! Please approach to our personnel for payment.",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
+                    const Text(
+                      "Thank you! Please approach to our personnel for payment.",
+                      style: TextStyle(
+                        fontFamily: 'SpaceGrotesk',
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
                       ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        "Please provide your Customer ID to our personnel",
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 12,
-                        ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      "Please provide your Customer ID to our personnel",
+                      style: TextStyle(
+                        fontFamily: 'SpaceGrotesk',
+                        color: Colors.grey,
+                        fontSize: 12,
                       ),
+                    ),
                     const SizedBox(height: 14),
-                    
+
                     // Customer ID
                     Container(
                       width: double.infinity,
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
                         color: const Color(0xFFC6FF8A),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: Colors.black),
                         boxShadow: [
                           BoxShadow(
-                          color: Colors.black,
-                          blurRadius: 0,
-                          offset: const Offset(0, 5),
+                            color: Colors.black,
+                            blurRadius: 0,
+                            offset: const Offset(0, 5),
                           ),
                         ],
-                        ),
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           const Text(
                             "Customer ID",
                             style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 20,
+                              fontFamily: 'SpaceGrotesk',
+                              fontWeight: FontWeight.w800,
+                              fontSize: 26,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                             _customerId,
+                            _customerId,
                             style: const TextStyle(
-                              fontWeight: FontWeight.w800,
+                              fontFamily: 'SpaceGrotesk',
+                              fontWeight: FontWeight.w900,
                               fontSize: 30,
                             ),
                           ),
@@ -156,7 +153,7 @@ class _PaymentPageState extends State<PaymentPage> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    
+
                     // Your Document ID
                     Container(
                       width: double.infinity,
@@ -167,9 +164,9 @@ class _PaymentPageState extends State<PaymentPage> {
                         border: Border.all(color: Colors.black),
                         boxShadow: [
                           BoxShadow(
-                          color: Colors.black,
-                          blurRadius: 0,
-                          offset: const Offset(0, 5),
+                            color: Colors.black,
+                            blurRadius: 0,
+                            offset: const Offset(0, 5),
                           ),
                         ],
                       ),
@@ -178,14 +175,14 @@ class _PaymentPageState extends State<PaymentPage> {
                         children: [
                           Row(
                             children: [
-                                SizedBox(
+                              SizedBox(
                                 width: 40,
                                 height: 40,
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(20),
                                   child: Image.asset(
-                                  'assets/avatar.png',
-                                  fit: BoxFit.cover,
+                                    'assets/avatar.png',
+                                    fit: BoxFit.cover,
                                   ),
                                 ),
                               ),
@@ -193,14 +190,15 @@ class _PaymentPageState extends State<PaymentPage> {
                               const Text(
                                 "Your Documents",
                                 style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 16,
+                                  fontFamily: 'SpaceGrotesk',
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 20,
                                 ),
                               ),
                             ],
                           ),
                           const SizedBox(height: 12),
-                          
+
                           // Document list
                           ...widget.uploadedFiles.asMap().entries.map((entry) {
                             final index = entry.key;
@@ -235,6 +233,7 @@ class _PaymentPageState extends State<PaymentPage> {
                                             child: const Text(
                                               'PDF',
                                               style: TextStyle(
+                                                fontFamily: 'SpaceGrotesk',
                                                 color: Colors.white,
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 10,
@@ -253,25 +252,32 @@ class _PaymentPageState extends State<PaymentPage> {
                                       children: [
                                         Text(
                                           file.name,
-                                          style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
+                                          style: const TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 12,
+                                          ),
                                           overflow: TextOverflow.ellipsis,
                                           maxLines: 1,
                                         ),
                                         Text(
-                                          _formatFileSize(file.size),
+                                          "₱2.00",
                                           style: const TextStyle(
+                                            fontFamily: 'SpaceGrotesk',
                                             color: Colors.grey,
                                             fontSize: 12,
+                                            fontWeight: FontWeight.w600,
                                           ),
                                         ),
                                       ],
                                     ),
-                                  ),                                  
+                                  ),
                                   const SizedBox(width: 6),
                                   Text(
                                     _generateDocumentId(file.name, index),
-                                    style: const TextStyle(                                      
-                                      fontWeight: FontWeight.w500,
+                                    style: const TextStyle(
+                                      fontFamily: 'SpaceGrotesk',
+                                      fontWeight: FontWeight.w600,
                                       fontSize: 14,
                                     ),
                                   ),
@@ -281,9 +287,9 @@ class _PaymentPageState extends State<PaymentPage> {
                           }),
                         ],
                       ),
-                    ),                  
+                    ),
                     const SizedBox(height: 20),
-                    
+
                     // Amount to Pay
                     Container(
                       width: double.infinity,
@@ -298,7 +304,8 @@ class _PaymentPageState extends State<PaymentPage> {
                           Text(
                             "₱${widget.totalAmount.toStringAsFixed(2)}",
                             style: const TextStyle(
-                              fontWeight: FontWeight.bold,
+                              fontFamily: 'SpaceGrotesk',
+                              fontWeight: FontWeight.w900,
                               fontSize: 30,
                               color: Colors.black,
                             ),
@@ -306,7 +313,8 @@ class _PaymentPageState extends State<PaymentPage> {
                           const Text(
                             "Amount to Pay",
                             style: TextStyle(
-                              fontWeight: FontWeight.w500,
+                              fontFamily: 'SpaceGrotesk',
+                              fontWeight: FontWeight.w800,
                               fontSize: 16,
                               color: Colors.black,
                             ),
@@ -314,9 +322,9 @@ class _PaymentPageState extends State<PaymentPage> {
                         ],
                       ),
                     ),
-                    
+
                     const SizedBox(height: 16),
-                    
+
                     // Feedback Section
                     Container(
                       width: double.infinity,
@@ -341,7 +349,8 @@ class _PaymentPageState extends State<PaymentPage> {
                           const Text(
                             "How was your experience?",
                             style: TextStyle(
-                              fontWeight: FontWeight.bold,
+                              fontFamily: 'SpaceGrotesk',
+                              fontWeight: FontWeight.w700,
                               fontSize: 18,
                               color: Colors.black,
                             ),
@@ -351,8 +360,10 @@ class _PaymentPageState extends State<PaymentPage> {
                           const Text(
                             "Your review meant a lot to us!",
                             style: TextStyle(
+                              fontFamily: 'SpaceGrotesk',
                               fontSize: 14,
-                              color: Colors.black87,
+                              color: Colors.black,
+                              fontWeight: FontWeight.w600,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -376,7 +387,7 @@ class _PaymentPageState extends State<PaymentPage> {
                           ),
                           const SizedBox(height: 12),
                           SizedBox(
-                            width: 160,
+                            width: 170,
                             height: 44,
                             child: ElevatedButton(
                               onPressed: _sendFeedback,
@@ -387,18 +398,19 @@ class _PaymentPageState extends State<PaymentPage> {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 textStyle: const TextStyle(
+                                  fontFamily: 'SpaceGrotesk',
                                   fontSize: 14,
                                 ),
                                 elevation: 0,
                               ),
-                              child: const Text("Send a Feedback"),
+                              child: const Text("Send a Feedback", style: TextStyle(fontFamily: 'SpaceGrotesk')),
                             ),
                           ),
                         ],
                       ),
-                    ),                    
+                    ),
                     const SizedBox(height: 6),
-                    
+
                     // Finish Transaction
                     Container(
                       decoration: BoxDecoration(
@@ -424,11 +436,17 @@ class _PaymentPageState extends State<PaymentPage> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
+                            textStyle: const TextStyle(
+                              fontFamily: 'SpaceGrotesk',
+                              fontWeight: FontWeight.w800,
+                              fontSize: 20,
+                            ),
                           ),
                           child: const Text(
                             "Finish Transaction",
                             style: TextStyle(
-                              fontWeight: FontWeight.w800,
+                              fontFamily: 'SpaceGrotesk',
+                              fontWeight: FontWeight.w900,
                               fontSize: 20,
                             ),
                           ),

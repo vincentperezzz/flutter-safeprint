@@ -490,6 +490,7 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
+                        fontFamily: 'SpaceGrotesk',
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -553,9 +554,10 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
                                     Text(
                                       file.name,
                                       style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
+                                        fontWeight: FontWeight.w600,
                                         fontSize: 15,
                                         color: Colors.black,
+                                        fontFamily: 'Inter',
                                       ),
                                       overflow: TextOverflow.ellipsis,
                                       maxLines: 1,
@@ -566,6 +568,7 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
                                       style: const TextStyle(
                                         color: Colors.grey,
                                         fontSize: 12,
+                                        fontFamily: 'SpaceGrotesk',
                                       ),
                                     ),
                                   ],
@@ -624,8 +627,9 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             textStyle: const TextStyle(
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.w900,
                               fontSize: 18,
+                              fontFamily: 'SpaceGrotesk',
                             ),
                           ),
                           child: _isUploading
