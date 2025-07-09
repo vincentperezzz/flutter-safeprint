@@ -63,6 +63,7 @@ class _AboutUsPageState extends State<AboutUsPage> {
                             child: const Text(
                               'About Us',
                               style: TextStyle(
+                                fontFamily: 'SpaceGrotesk',
                                 fontWeight: FontWeight.bold,
                                 fontSize: 20,
                                 color: Colors.black,
@@ -73,6 +74,7 @@ class _AboutUsPageState extends State<AboutUsPage> {
                           const Text(
                             "Meet the skilled and experienced team behind\nour successful privacy-focused print management system.",
                             style: TextStyle(
+                              fontFamily: 'SpaceGrotesk',
                               color: Colors.black,
                               fontSize: 12,
                             ),
@@ -99,6 +101,7 @@ class _AboutUsPageState extends State<AboutUsPage> {
                                 const Text(
                                   "SafePrint is a secure and efficient print management system developed as a college capstone project by Crystaline M. Datu, Charles Gabriel D. Gavino, and Vincent P. Perez taking BS Information Technology from Batangas State University The National Engineering University - Alangilan Campus. It aims to improve the printing process by providing a secure file transfer portal between customers and print shops, ensuring that documents are not stored or left behind on shop computers.",
                                   style: TextStyle(
+                                    fontFamily: 'SpaceGrotesk',
                                     color: Colors.black,
                                     fontSize: 12,
                                     height: 1.5,
@@ -157,6 +160,7 @@ class _AboutUsPageState extends State<AboutUsPage> {
                                     child: const Text(
                                       "NanoPrint",
                                       style: TextStyle(
+                                        fontFamily: 'SpaceGrotesk',
                                         color: Colors.black,
                                         fontWeight: FontWeight.bold,
                                         fontSize: 20,
@@ -172,6 +176,7 @@ class _AboutUsPageState extends State<AboutUsPage> {
                                     child: const Text(
                                       "Powered by SafePrint",
                                       style: TextStyle(
+                                        fontFamily: 'SpaceGrotesk',
                                         color: Colors.black,
                                         fontSize: 12,
                                       ),
@@ -194,6 +199,7 @@ class _AboutUsPageState extends State<AboutUsPage> {
                             child: const Text(
                               'Contact Us',
                               style: TextStyle(
+                                fontFamily: 'SpaceGrotesk',
                                 fontWeight: FontWeight.bold,
                                 fontSize: 20,
                                 color: Colors.black,
@@ -214,6 +220,7 @@ class _AboutUsPageState extends State<AboutUsPage> {
                             child: const Text(
                               'Email: nanoprint.alangilan@gmail.com',
                               style: TextStyle(
+                                fontFamily: 'SpaceGrotesk',
                                 color: Colors.white,
                                 fontSize: 12,
                                 decoration: TextDecoration.underline,
@@ -233,6 +240,7 @@ class _AboutUsPageState extends State<AboutUsPage> {
                             child: const Text(
                               'Address: Neptune St. Golden Country Homes, Alangilan, Batangas City, Philippines',
                               style: TextStyle(
+                                fontFamily: 'SpaceGrotesk',
                                 color: Colors.white,
                                 fontSize: 12,
                                 decoration: TextDecoration.underline,
@@ -272,7 +280,10 @@ class _AboutUsPageState extends State<AboutUsPage> {
                               icon: const Icon(Icons.facebook, color: Colors.white),
                               label: const Text(
                                 'Follow on Facebook',
-                                style: TextStyle(fontSize: 12),
+                                style: TextStyle(
+                                  fontFamily: 'SpaceGrotesk',
+                                  fontSize: 12,
+                                ),
                               ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF4267B2),
@@ -280,7 +291,10 @@ class _AboutUsPageState extends State<AboutUsPage> {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20),
                                 ),
-                                textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                                textStyle: const TextStyle(
+                                  fontFamily: 'SpaceGrotesk',
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
@@ -290,7 +304,11 @@ class _AboutUsPageState extends State<AboutUsPage> {
                           Center(
                             child: Text(
                               '© 2025 SafePrint. All Rights Reserved.',
-                              style: TextStyle(color: Colors.white70, fontSize: 12),
+                              style: TextStyle(
+                                fontFamily: 'SpaceGrotesk',
+                                color: Colors.white70,
+                                fontSize: 12,
+                              ),
                             ),
                           ),
                         ],
@@ -319,6 +337,7 @@ class _FooterLink extends StatelessWidget {
       child: Text(
         text,
         style: const TextStyle(
+          fontFamily: 'SpaceGrotesk',
           color: Colors.white,
           fontSize: 12,
           decoration: TextDecoration.underline,
