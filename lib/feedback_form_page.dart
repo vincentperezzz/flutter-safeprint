@@ -21,6 +21,16 @@ class FeedbackFormPage extends StatelessWidget {
               labelColor: Colors.blue,
               unselectedLabelColor: Colors.grey,
               indicatorColor: Colors.blue,
+              labelStyle: TextStyle(
+                fontFamily: 'SpaceGrotesk',
+                fontWeight: FontWeight.w700,
+                fontSize: 16,
+              ),
+              unselectedLabelStyle: TextStyle(
+                fontFamily: 'SpaceGrotesk',
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+              ),
               tabs: [
                 Tab(icon: Icon(Icons.comment), text: 'Comments'),
                 Tab(icon: Icon(Icons.report_problem), text: 'Problems'),
@@ -56,12 +66,12 @@ class FeedbackFormContent extends StatelessWidget {
     }
 
     return Center(
-      child: SingleChildScrollView( // Added to prevent overflow
+      child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white, // Fill the whole container with white
+              color: Colors.white,
               border: Border.all(color: Colors.black, width: 1),
               borderRadius: BorderRadius.circular(16),
             ),
@@ -74,7 +84,8 @@ class FeedbackFormContent extends StatelessWidget {
                   child: Text(
                     title,
                     style: const TextStyle(
-                      fontWeight: FontWeight.bold,
+                      fontFamily: 'SpaceGrotesk',
+                      fontWeight: FontWeight.w700,
                       fontSize: 18,
                       color: Colors.black,
                     ),
@@ -84,22 +95,36 @@ class FeedbackFormContent extends StatelessWidget {
                 TextField(
                   decoration: const InputDecoration(
                     labelText: 'Name',
+                    labelStyle: TextStyle(
+                      fontFamily: 'SpaceGrotesk',
+                      color: Colors.black,
+                    ),
                     border: OutlineInputBorder(),
                     filled: true,
                     fillColor: Colors.white,
                   ),
-                  style: const TextStyle(color: Colors.black),
+                  style: const TextStyle(
+                    fontFamily: 'SpaceGrotesk',
+                    color: Colors.black,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   decoration: const InputDecoration(
                     labelText: 'Your Message Here...',
+                    labelStyle: TextStyle(
+                      fontFamily: 'SpaceGrotesk',
+                      color: Colors.black,
+                    ),
                     border: OutlineInputBorder(),
                     filled: true,
                     fillColor: Colors.white,
                   ),
                   maxLines: 4,
-                  style: const TextStyle(color: Colors.black),
+                  style: const TextStyle(
+                    fontFamily: 'SpaceGrotesk',
+                    color: Colors.black,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
@@ -109,20 +134,43 @@ class FeedbackFormContent extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(5),
                     ),
+                    textStyle: const TextStyle(
+                      fontFamily: 'SpaceGrotesk',
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   onPressed: () {
                     showDialog(
                       context: context,
                       builder: (context) => AlertDialog(
-                        title: const Text('Thank you!'),
-                        content: const Text('Your feedback has been submitted.'),
+                        title: const Text(
+                          'Thank you!',
+                          style: TextStyle(
+                            fontFamily: 'SpaceGrotesk',
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        content: const Text(
+                          'Your feedback has been submitted.',
+                          style: TextStyle(
+                            fontFamily: 'SpaceGrotesk',
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black,
+                          ),
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(),
-                            child: const Text('OK'),
+                            child: const Text(
+                              'OK',
+                              style: TextStyle(
+                                fontFamily: 'SpaceGrotesk',
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                           ),
                         ],
                       ),
