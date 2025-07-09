@@ -143,7 +143,7 @@ class _SampleAppState extends State<SampleApp> {
                   child: Text(
                     'Menu',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Colors.black,
                       fontSize: 24,
                       fontFamily: 'SpaceGrotesk',
                       fontWeight: FontWeight.w800,
@@ -156,7 +156,7 @@ class _SampleAppState extends State<SampleApp> {
                     'Help',
                     style: TextStyle(
                       fontFamily: 'SpaceGrotesk',
-                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
                     ),
                   ),
                   onTap: () {
@@ -172,7 +172,7 @@ class _SampleAppState extends State<SampleApp> {
                     'FAQs',
                     style: TextStyle(
                       fontFamily: 'SpaceGrotesk',
-                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
                     ),
                   ),
                   onTap: () {
@@ -188,7 +188,7 @@ class _SampleAppState extends State<SampleApp> {
                     'About Us',
                     style: TextStyle(
                       fontFamily: 'SpaceGrotesk',
-                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
                     ),
                   ),
                   onTap: () {

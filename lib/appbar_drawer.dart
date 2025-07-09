@@ -33,6 +33,7 @@ PreferredSizeWidget buildNanoPrintAppBar(VoidCallback onLogoTap) {
                     child: const Text(
                       "NanoPrint",
                       style: TextStyle(
+                        fontFamily: 'SpaceGrotesk',
                         color: Colors.black,
                         fontWeight: FontWeight.bold,
                         fontSize: 20,
@@ -48,6 +49,7 @@ PreferredSizeWidget buildNanoPrintAppBar(VoidCallback onLogoTap) {
                     child: const Text(
                       "Powered by SafePrint",
                       style: TextStyle(
+                        fontFamily: 'SpaceGrotesk',
                         color: Colors.black,
                         fontSize: 12,
                       ),
@@ -87,6 +89,7 @@ Widget buildNanoPrintDrawer(BuildContext context, void Function(int) onNav) {
               child: const Text(
                 'Menu',
                 style: TextStyle(
+                  fontFamily: 'SpaceGrotesk',
                   color: Colors.black, 
                   fontSize: 24, 
                   fontWeight: FontWeight.bold
@@ -99,7 +102,11 @@ Widget buildNanoPrintDrawer(BuildContext context, void Function(int) onNav) {
                 leading: const Icon(Icons.help_outline, color: Colors.black),
                 title: const Text(
                   'Help', 
-                  style: TextStyle(color: Colors.black, fontSize: 16)
+                  style: TextStyle(
+                    fontFamily: 'SpaceGrotesk',
+                    color: Colors.black, 
+                    fontSize: 16
+                  )
                 ),
                 onTap: () {
                   Navigator.of(context).pop();
@@ -113,7 +120,11 @@ Widget buildNanoPrintDrawer(BuildContext context, void Function(int) onNav) {
                 leading: const Icon(Icons.question_answer, color: Colors.black),
                 title: const Text(
                   'FAQ', 
-                  style: TextStyle(color: Colors.black, fontSize: 16)
+                  style: TextStyle(
+                    fontFamily: 'SpaceGrotesk',
+                    color: Colors.black, 
+                    fontSize: 16
+                  )
                 ),
                 onTap: () {
                   Navigator.of(context).pop();
@@ -127,7 +138,11 @@ Widget buildNanoPrintDrawer(BuildContext context, void Function(int) onNav) {
                 leading: const Icon(Icons.info_outline, color: Colors.black),
                 title: const Text(
                   'About Us', 
-                  style: TextStyle(color: Colors.black, fontSize: 16)
+                  style: TextStyle(
+                    fontFamily: 'SpaceGrotesk',
+                    color: Colors.black, 
+                    fontSize: 16
+                  )
                 ),
                 onTap: () {
                   Navigator.of(context).pop();
