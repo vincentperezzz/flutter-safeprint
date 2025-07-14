@@ -423,39 +423,39 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
                           ),
                           child: Row(
                             children: [
-                              const Padding(
-                                padding: EdgeInsets.only(left: 16.0),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 16.0),
                                 child: Text(
                                   "Upload from Files",
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: Colors.black,
                                     fontWeight: FontWeight.w800,
-                                    fontFamily: 'Montserrat',
+                                    fontFamily: 'SpaceGrotesk',
                                   ),
                                 ),
                               ),
                               const Spacer(),
-                                Container(
-                                width: 130,
+                              Container(
+                                width: 110,
                                 height: 36,
                                 margin: const EdgeInsets.only(right: 12),
-                                  decoration: BoxDecoration(
-                                    color: Color(0xFFFFB800),
-                                    border: Border.all(color: Colors.black, width: 1),
-                                    borderRadius: BorderRadius.circular(12),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black,
-                                        blurRadius: 0,
-                                        spreadRadius: 0,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ],
-                                  ),
-                                  child: TextButton(
-                                    onPressed: _pickFiles,
-                                    style: TextButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: Color(0xFFFFB800),
+                                  border: Border.all(color: Colors.black, width: 1),
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black,
+                                      blurRadius: 0,
+                                      spreadRadius: 0,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: TextButton(
+                                  onPressed: _pickFiles,
+                                  style: TextButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
@@ -463,14 +463,16 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
                                     foregroundColor: Colors.black,
                                     textStyle: const TextStyle(
                                       fontWeight: FontWeight.bold,
+                                      fontFamily: 'SpaceGrotesk',
                                     ),
-                                    ),
-                                    child: const Text(
+                                  ),
+                                  child: const Text(
                                     "Browse Files",
                                     style: TextStyle(
                                       color: Colors.black,
                                       fontWeight: FontWeight.w900,
-                                      fontFamily: 'Montserrat',
+                                      fontFamily: 'SpaceGrotesk',
+                                      fontSize: 13.5,
                                     ),
                                   ),
                                 ),
