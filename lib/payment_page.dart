@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
 import 'appbar_drawer.dart';
 
 class PaymentPage extends StatefulWidget {
-  final List<PlatformFile> uploadedFiles;
+  final List<Map<String, dynamic>> uploadedFiles;
   final double totalAmount;
 
   const PaymentPage({
@@ -202,7 +201,7 @@ class _PaymentPageState extends State<PaymentPage> {
                           // Document list
                           ...widget.uploadedFiles.asMap().entries.map((entry) {
                             final index = entry.key;
-                            final file = entry.value;
+                            final doc = entry.value;
                             return Container(
                               margin: const EdgeInsets.only(bottom: 8),
                               padding: const EdgeInsets.all(10),
@@ -251,7 +250,7 @@ class _PaymentPageState extends State<PaymentPage> {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          file.name,
+                                          doc['filename'] ?? '',
                                           style: const TextStyle(
                                             fontFamily: 'Inter',
                                             fontWeight: FontWeight.w600,
@@ -274,7 +273,7 @@ class _PaymentPageState extends State<PaymentPage> {
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
-                                    _generateDocumentId(file.name, index),
+                                    _generateDocumentId(doc['filename'] ?? '', index),
                                     style: const TextStyle(
                                       fontFamily: 'SpaceGrotesk',
                                       fontWeight: FontWeight.w600,

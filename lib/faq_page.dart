@@ -8,7 +8,7 @@ class FAQPage extends StatefulWidget {
 }
 
 class _FAQPageState extends State<FAQPage> {
-  int? expandedIndex = null;
+  int? expandedIndex;
 
   final faqs = [
     {

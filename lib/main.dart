@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:dotted_border/dotted_border.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'feedback_form_page.dart';
 import 'help_page.dart';
 import 'faq_page.dart';
 import 'about_us_page.dart';
 import 'uploaded_documents_preview_page.dart';
+import 'package:http_parser/http_parser.dart';
 
 void main() => runApp(const SampleApp());
 
@@ -296,27 +299,72 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
       _isUploading = true;
     });
 
+    final processedDocs = <Map<String, dynamic>>[];
     try {
-      // Simulate upload process
-      await Future.delayed(const Duration(seconds: 2));
-      
-      // Store the uploaded files
-      final uploadedFiles = List<PlatformFile>.from(_selectedFiles);
-      
+      for (final file in _selectedFiles) {
+        final uri = Uri.parse('http://192.168.1.205:8080/api/upload-file/');
+        final request = http.MultipartRequest('POST', uri);
+        if (file.bytes != null) {
+          // Web: use bytes
+          request.files.add(
+            http.MultipartFile.fromBytes(
+              'file',
+              file.bytes!,
+              filename: file.name,
+              contentType: MediaType('application', 'pdf'),
+            ),
+          );
+        } else if (file.path != null) {
+          // Mobile/Desktop: use path
+          request.files.add(
+            await http.MultipartFile.fromPath('file', file.path!),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('File data unavailable for ${file.name}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          continue;
+        }
+
+        // If CSRF token is needed, add it here:
+        // request.headers['X-CSRFToken'] = 'your_csrf_token';
+
+        final response = await request.send();
+        if (response.statusCode == 200) {
+          final respStr = await response.stream.bytesToString();
+          final respJson = respStr.isNotEmpty ? respStr : '{}';
+          final docData = respJson.isNotEmpty ? Map<String, dynamic>.from(jsonDecode(respJson)) : {};
+          processedDocs.add({
+            'filename': file.name,
+            'file_size': file.size,
+            ...docData,
+          });
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to upload ${file.name}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+
       setState(() {
         _selectedFiles.clear();
         _isUploading = false;
       });
 
-      // Navigate to uploaded documents preview page
+      // Navigate to uploaded documents preview page, passing processedDocs
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => UploadedDocumentsPreviewPage(
-            uploadedFiles: uploadedFiles,
+            uploadedFiles: processedDocs,
           ),
         ),
       );
-      
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

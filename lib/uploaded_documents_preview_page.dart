@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
 import 'payment_page.dart';
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'appbar_drawer.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class UploadedDocumentsPreviewPage extends StatefulWidget {
-  final List<PlatformFile> uploadedFiles;
+  final List<Map<String, dynamic>> uploadedFiles;
 
   const UploadedDocumentsPreviewPage({
     super.key,
@@ -73,10 +73,13 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                     // Documents list
                     ...widget.uploadedFiles.asMap().entries.map((entry) {
                       final i = entry.key;
-                      final file = entry.value;
+                      final doc = entry.value;
                       return DocumentPreviewItem(
-                        fileName: file.name,
-                        fileSize: _formatFileSize(file.size),
+                        fileName: doc['filename'] ?? '',
+                        fileSize: _formatFileSize(doc['file_size'] ?? 0),
+                        numPages: doc['num_pages']?.toString() ?? '-',
+                        orientation: doc['orientation']?.toString() ?? '-',
+                        paperSize: doc['paper_size']?.toString() ?? '-',
                         onRemove: () {
                           setState(() {
                             widget.uploadedFiles.removeAt(i);
@@ -175,12 +178,18 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
 class DocumentPreviewItem extends StatefulWidget {
   final String fileName;
   final String fileSize;
+  final String numPages;
+  final String orientation;
+  final String paperSize;
   final VoidCallback onRemove;
 
   const DocumentPreviewItem({
     super.key,
     required this.fileName,
     required this.fileSize,
+    required this.numPages,
+    required this.orientation,
+    required this.paperSize,
     required this.onRemove,
   });
 
@@ -195,6 +204,42 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
   bool grayscale = false;
   String paperSize = "Long (8.5×13in)";
   String paperQuality = "70 GSM (thinner)";
+  bool isSaving = false;
+
+  Future<void> _saveSettings() async {
+    setState(() { isSaving = true; });
+    final url = Uri.parse('http://192.168.1.205:8080/api/update-document-settings/');
+    final payload = {
+      'filename': widget.fileName,
+      'copies': copies,
+      'pages_selection': pagesSelection,
+      'orientation': orientation,
+      'grayscale': grayscale,
+      'paper_size': paperSize,
+      'paper_quality': paperQuality,
+    };
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(payload),
+      );
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Settings updated!'), backgroundColor: Colors.green),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update: ${response.statusCode}'), backgroundColor: Colors.red),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+      );
+    }
+    setState(() { isSaving = false; });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -502,7 +547,7 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
           ),
           const SizedBox(height: 6),
           DropdownButtonHideUnderline(
-            child: DropdownButton2<String>(
+            child: DropdownButton<String>(
               isExpanded: true,
               value: paperSize,
               items: [
@@ -527,41 +572,6 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
                   setState(() => paperSize = newValue);
                 }
               },
-              buttonStyleData: ButtonStyleData(
-                height: 44,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: Colors.black),
-                ),
-                padding: const EdgeInsets.only(left: 12, right: 0),
-              ),
-              iconStyleData: IconStyleData(
-                icon: Container(
-                  width: 44,
-                  height: double.infinity,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFFFB800),
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(14),
-                      bottomRight: Radius.circular(14),
-                    ),
-                  ),
-                  child: const Icon(Icons.keyboard_arrow_down, color: Colors.black),
-                ),
-              ),
-              dropdownStyleData: DropdownStyleData(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.black, width: 1),
-                ),
-                elevation: 2,
-              ),
-              menuItemStyleData: MenuItemStyleData(
-                height: 44
-              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -576,7 +586,7 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
           ),
           const SizedBox(height: 6),
           DropdownButtonHideUnderline(
-            child: DropdownButton2<String>(
+            child: DropdownButton<String>(
               isExpanded: true,
               value: paperQuality,
               items: [
@@ -600,48 +610,34 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
                   setState(() => paperQuality = newValue);
                 }
               },
-              buttonStyleData: ButtonStyleData(
-                height: 44,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: Colors.black),
-                ),
-                padding: const EdgeInsets.only(left: 12, right: 0),
-              ),
-              iconStyleData: IconStyleData(
-                icon: Container(
-                  width: 44,
-                  height: double.infinity,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFFFB800),
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(14),
-                      bottomRight: Radius.circular(14),
-                    ),
-                  ),
-                  child: const Icon(Icons.keyboard_arrow_down, color: Colors.black),
-                ),
-              ),
-              dropdownStyleData: DropdownStyleData(
-                decoration: BoxDecoration(
-                  color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: isSaving ? null : _saveSettings,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.black, width: 1),
                 ),
-                elevation: 2,
+                textStyle: const TextStyle(fontWeight: FontWeight.bold),
               ),
-              menuItemStyleData: MenuItemStyleData(
-                height: 44,
-              ),
+              child: isSaving
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    )
+                  : const Text('Save Settings'),
             ),
           ),
         ],
       ),
     );
   }
-
   Widget _buildRadioOption(String title, bool isSelected, Function(bool) onChanged) {
     return GestureDetector(
       onTap: () => onChanged(true),
@@ -716,3 +712,4 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
     );
   }
 }
+
