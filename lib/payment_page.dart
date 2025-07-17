@@ -4,11 +4,13 @@ import 'appbar_drawer.dart';
 class PaymentPage extends StatefulWidget {
   final List<Map<String, dynamic>> uploadedFiles;
   final double totalAmount;
+  final String? customerId;
 
   const PaymentPage({
     super.key,
     required this.uploadedFiles,
     required this.totalAmount,
+    this.customerId,
   });
 
   @override
@@ -22,9 +24,14 @@ class _PaymentPageState extends State<PaymentPage> {
   @override
   void initState() {
     super.initState();
-    // Check if any document contains a customer_id, otherwise generate one
-    String? customerIdFromDocs;
+    // Use provided customer ID if available
+    if (widget.customerId != null && widget.customerId!.isNotEmpty) {
+      _customerId = widget.customerId!;
+      return;
+    }
     
+    // Check if any document contains a customer_id
+    String? customerIdFromDocs;
     for (var doc in widget.uploadedFiles) {
       if (doc.containsKey('customer_id') && doc['customer_id'] != null) {
         customerIdFromDocs = doc['customer_id'].toString();
@@ -32,6 +39,7 @@ class _PaymentPageState extends State<PaymentPage> {
       }
     }
     
+    // Use document customer_id or generate one as last resort
     _customerId = customerIdFromDocs ?? _generateCustomerId();
   }
 

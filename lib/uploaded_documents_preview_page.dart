@@ -407,7 +407,7 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                                     }
                                     
                                     // Send all settings to the API
-                                    final url = Uri.parse('http://192.168.1.205:8080/api/flutter-update-document-settings/');
+                                    final url = Uri.parse('http://192.168.1.205:8080/api/update-document-settings/');
                                     
                                     // Prepare headers with CSRF token
                                     final headers = {
@@ -507,7 +507,7 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                                     if (confirmData['success'] == true) {
                                       // Get data from confirmation response
                                       double totalAmount = confirmData['total_price'] != null ? 
-                                          confirmData['total_price'].toDouble() : 45.00;
+                                          double.parse(confirmData['total_price'].toString()) : 45.00;
                                       
                                       List<Map<String, dynamic>> documents = [];
                                       if (confirmData['documents'] != null) {
@@ -540,6 +540,7 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                                             builder: (context) => PaymentPage(
                                               uploadedFiles: documents,
                                               totalAmount: totalAmount,
+                                              customerId: confirmData['customer_id']?.toString(),
                                             ),
                                           ),
                                         );
