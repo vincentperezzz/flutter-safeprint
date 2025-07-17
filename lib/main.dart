@@ -256,6 +256,7 @@ class MediaUploadPage extends StatefulWidget {
 
 class _MediaUploadPageState extends State<MediaUploadPage> {
   List<PlatformFile> _selectedFiles = [];
+  List<Map<String, dynamic>> _uploadedFileInfos = [];
   bool _isUploading = false;
   bool _isInitializing = true;
   
@@ -409,6 +410,16 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
         }
 
         final parsedResponse = jsonDecode(responseData);
+        // Save file_path, original_name, file_size for display and deletion
+        if (parsedResponse['file_path'] != null && parsedResponse['original_name'] != null && parsedResponse['file_size'] != null) {
+          setState(() {
+            _uploadedFileInfos.add({
+              'file_path': parsedResponse['file_path'],
+              'original_name': parsedResponse['original_name'],
+              'file_size': parsedResponse['file_size'],
+            });
+          });
+        }
 
         // Check if we received an updated session key
         if (parsedResponse['session_key'] != null) {
@@ -435,7 +446,7 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
   }
 
   Future<void> _removeFile(int index) async {
-    final file = _selectedFiles[index];
+    final fileInfo = _uploadedFileInfos[index];
     
     try {
       // Make API call to delete the file
@@ -452,9 +463,8 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
       
       // Prepare body with session key
       final body = {
-        'filename': file.name,
+        'file_path': fileInfo['file_path'],
       };
-      
       if (SessionService.instance.sessionKey != null) {
         body['session_key'] = SessionService.instance.sessionKey!;
       }
@@ -481,11 +491,11 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
         // Only remove from UI if deletion was successful on server
         setState(() {
           _selectedFiles.removeAt(index);
+          _uploadedFileInfos.removeAt(index);
         });
-        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('File ${file.name} deleted successfully'),
+            content: Text('File ${fileInfo['original_name']} deleted successfully'),
             backgroundColor: Colors.green,
           ),
         );
@@ -780,10 +790,10 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
                   ),
                   
                   // Show selected files
-                  if (_selectedFiles.isNotEmpty) ...[
+                  if (_uploadedFileInfos.isNotEmpty) ...[
                     const SizedBox(height: 16),
                     const Text(
-                      "Selected Files:",
+                      "Uploaded Files:",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -794,9 +804,9 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: _selectedFiles.length,
+                      itemCount: _uploadedFileInfos.length,
                       itemBuilder: (context, index) {
-                        final file = _selectedFiles[index];
+                        final fileInfo = _uploadedFileInfos[index];
                         return Container(
                           margin: const EdgeInsets.only(bottom: 8),
                           padding: const EdgeInsets.all(12),
@@ -808,16 +818,13 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              // PDF Icon
                               SizedBox(
                                 width: 40,
                                 height: 40,
                                 child: Stack(
                                   alignment: Alignment.bottomLeft,
                                   children: [
-                                    // Document outline icon
                                     Icon(Icons.insert_drive_file_outlined, color: Colors.grey[300], size: 40),
-                                    // PDF label
                                     Positioned(
                                       left: 0,
                                       bottom: 10,
@@ -842,14 +849,13 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
                                 ),
                               ),
                               const SizedBox(width: 6),
-                              // File name and size
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      file.name,
+                                      fileInfo['original_name'] ?? '',
                                       style: const TextStyle(
                                         fontWeight: FontWeight.w600,
                                         fontSize: 15,
@@ -861,7 +867,7 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      _formatFileSize(file.size),
+                                      _formatFileSize(fileInfo['file_size'] ?? 0),
                                       style: const TextStyle(
                                         color: Colors.grey,
                                         fontSize: 12,
@@ -872,7 +878,6 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
                                 ),
                               ),
                               const SizedBox(width: 6),
-                              // Remove button
                               InkWell(
                                 onTap: () => _removeFile(index),
                                 borderRadius: BorderRadius.circular(16),
