@@ -191,10 +191,7 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                       final doc = entry.value;
                       // Generate a unique key for each document - fallback to index if filename is missing
                       final keyValue = doc['filename'] != null ? 'doc-${doc['filename']}' : 'doc-$i';
-                      
-                      // Debug log for document metadata
-                      print('DEBUG: Rendering document $i with metadata: ${doc}');
-                      
+                                            
                       return DocumentPreviewItem(
                         key: ValueKey(keyValue),
                         fileName: doc['filename'] ?? 'Document ${i + 1}',
@@ -208,6 +205,7 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                         docId: doc['doc_id']?.toString() ?? '-',
                         originalName: doc['original_name']?.toString() ?? '-',
                         filePath: doc['file_path']?.toString() ?? '-',
+                        copies: doc['copies'] != null ? int.tryParse(doc['copies'].toString()) ?? 1 : null,
                         onRemove: () async {
                           // Get document information
                           final String filename = doc['filename'] ?? '';
@@ -395,13 +393,39 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                                           print('DEBUG: Adding file_path: $filePath to update payload');
                                         }
                                         
-                                        // Add all the other settings
-                                        payload['copies'] = docState.copies;
-                                        payload['pages_selection'] = docState.pagesSelection;
+                                        // Add all the other settings with field names expected by Django backend
+                                        payload['quantity'] = docState.copies;
+                                        
+                                        // Handle pages selection - send specific page numbers if that option is selected
+                                        if (docState.pagesSelection == "Specific Pages" && docState._specificPagesController.text.isNotEmpty) {
+                                          payload['pages'] = docState._specificPagesController.text.trim();
+                                        } else {
+                                          // Use "1-numPages" if available, fallback to "1-3"
+                                          final numPages = docState.widget.numPages.isNotEmpty && docState.widget.numPages != '-' 
+                                              ? docState.widget.numPages 
+                                              : "3";
+                                          payload['pages'] = "1-$numPages";
+                                        }
+                                        
                                         payload['orientation'] = docState.orientation;
-                                        payload['grayscale'] = docState.grayscale;
+                                        // Map grayscale boolean to appropriate string for Django
+                                        payload['grayscale'] = docState.grayscale ? 'Black and white' : 'Color';
                                         payload['paper_size'] = docState.getSimplifiedPaperSize();
                                         payload['paper_quality'] = docState.paperQuality.startsWith('70') ? '70' : '80';
+                                        
+                                        // Debug information for field mapping
+                                        print('DEBUG: Document field mapping:');
+                                        print('DEBUG: copies → quantity: ${docState.copies}');
+                                        
+                                        // Log the actual pages value being sent
+                                        String pagesValue = (docState.pagesSelection == "Specific Pages" && docState._specificPagesController.text.isNotEmpty) 
+                                            ? docState._specificPagesController.text.trim() 
+                                            : "All Pages";
+                                        print('DEBUG: pagesSelection → pages: $pagesValue');
+                                        
+                                        print('DEBUG: orientation: ${docState.orientation}');
+                                        print('DEBUG: grayscale → color mode: ${docState.grayscale ? "Black and white" : "Color"}');
+                                        
                                         updatedSettings.add(payload);
                                       }
                                     }
@@ -616,6 +640,7 @@ class DocumentPreviewItem extends StatefulWidget {
   final String docId;
   final String originalName;
   final String filePath;
+  final int? copies;
   final VoidCallback onRemove;
 
   const DocumentPreviewItem({
@@ -631,6 +656,7 @@ class DocumentPreviewItem extends StatefulWidget {
     required this.docId,
     required this.originalName,
     required this.filePath,
+    this.copies,
     required this.onRemove,
   });
 
@@ -646,10 +672,18 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
   String paperSize = "Long (8.5×13in)";
   String paperQuality = "70 GSM (thinner)";
   bool isSaving = false;
+  
+  // Controller for specific pages textbox
+  final TextEditingController _specificPagesController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    
+    // Initialize copies from widget if available
+    if (widget.copies != null) {
+      copies = widget.copies!;
+    }
     
     // Initialize default values from widget properties
     if (widget.orientation.isNotEmpty && widget.orientation != '-') {
@@ -717,6 +751,13 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
     if (ancestorState != null) {
       ancestorState._registerDocumentState(widget.fileName, this);
     }
+  }
+  
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is disposed
+    _specificPagesController.dispose();
+    super.dispose();
   }
 
   @override
@@ -941,9 +982,11 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
                 ),
                 child: pagesSelection == "Specific Pages"
                     ? TextField(
+                        controller: _specificPagesController,
                         enabled: true,
                         textAlign: TextAlign.center,
                         decoration: InputDecoration(
+                          hintText: "e.g., 1-3,5,7-9",
                           border: InputBorder.none,
                           hintStyle: TextStyle(
                             fontFamily: 'SpaceGrotesk',
