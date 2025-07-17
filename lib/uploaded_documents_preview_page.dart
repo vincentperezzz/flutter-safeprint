@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'services/session_service.dart';
 import 'services/http_logger.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 
 class UploadedDocumentsPreviewPage extends StatefulWidget {
   final List<Map<String, dynamic>> uploadedFiles;
@@ -935,7 +936,7 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
                   child: Padding(
                     padding: const EdgeInsets.only(left: 12.0),
                     child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
+                      child: DropdownButton2<String>(
                         isExpanded: true,
                         value: paperSize,
                         items: [
@@ -960,20 +961,43 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
                             setState(() => paperSize = newValue);
                           }
                         },
-                        icon: Container(
-                          width: 44,
-                          height: 44,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFFFB800),
-                            borderRadius: BorderRadius.only(
-                              topRight: Radius.circular(13),
-                              bottomRight: Radius.circular(13),
+                        customButton: Row(
+                          children: [
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 12.0),
+                                child: Text(
+                                  paperSize,
+                                  style: const TextStyle(
+                                    fontFamily: 'SpaceGrotesk',
+                                    color: Colors.black,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
-                          child: const Icon(Icons.keyboard_arrow_down, color: Colors.black),
+                            Container(
+                              width: 44,
+                              height: 48,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFFFB800),
+                                borderRadius: BorderRadius.only(
+                                  topRight: Radius.circular(13),
+                                  bottomRight: Radius.circular(13),
+                                ),
+                              ),
+                              child: const Icon(Icons.keyboard_arrow_down, color: Colors.black),
+                            ),
+                          ],
                         ),
-                        dropdownColor: Colors.white,
-                        elevation: 2,
+                        dropdownStyleData: DropdownStyleData(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.black, width: 1),
+                          ),
+                          elevation: 2,
+                        ),
                       ),
                     ),
                   ),
@@ -1004,7 +1028,7 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
                   child: Padding(
                     padding: const EdgeInsets.only(left: 12.0),
                     child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
+                      child: DropdownButton2<String>(
                         isExpanded: true,
                         value: paperQuality,
                         items: [
@@ -1028,20 +1052,43 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
                             setState(() => paperQuality = newValue);
                           }
                         },
-                        icon: Container(
-                          width: 44,
-                          height: 44,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFFFB800),
-                            borderRadius: BorderRadius.only(
-                              topRight: Radius.circular(13),
-                              bottomRight: Radius.circular(13),
+                        customButton: Row(
+                          children: [
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 12.0),
+                                child: Text(
+                                  paperQuality,
+                                  style: const TextStyle(
+                                    fontFamily: 'SpaceGrotesk',
+                                    color: Colors.black,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
-                          child: const Icon(Icons.keyboard_arrow_down, color: Colors.black),
+                            Container(
+                              width: 44,
+                              height: 49,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFFFB800),
+                                borderRadius: BorderRadius.only(
+                                  topRight: Radius.circular(13),
+                                  bottomRight: Radius.circular(13),
+                                ),
+                              ),
+                              child: const Icon(Icons.keyboard_arrow_down, color: Colors.black),
+                            ),
+                          ],
                         ),
-                        dropdownColor: Colors.white,
-                        elevation: 2,
+                        dropdownStyleData: DropdownStyleData(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.black, width: 1),
+                          ),
+                          elevation: 2,
+                        ),
                       ),
                     ),
                   ),
