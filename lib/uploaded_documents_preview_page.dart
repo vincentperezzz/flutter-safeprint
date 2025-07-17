@@ -373,24 +373,41 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                                     // Find all DocumentPreviewItem widgets and get their settings
                                     for (final doc in widget.uploadedFiles) {
                                       final fileName = doc['filename'] ?? '';
+                                      final docId = doc['doc_id']?.toString() ?? '';
+                                      final filePath = doc['file_path']?.toString() ?? '';
                                       // Find the key for this document
                                       final docState = _getDocumentState(fileName);
                                       if (docState != null) {
-                                        final payload = {
-                                          'filename': fileName,
-                                          'copies': docState.copies,
-                                          'pages_selection': docState.pagesSelection,
-                                          'orientation': docState.orientation,
-                                          'grayscale': docState.grayscale,
-                                          'paper_size': docState.getSimplifiedPaperSize(),
-                                          'paper_quality': docState.paperQuality.startsWith('70') ? '70' : '80',
-                                        };
+                                        final Map<String, dynamic> payload = {};
+                                        
+                                        // Use doc_id if available, otherwise fallback to filename for compatibility
+                                        if (docId.isNotEmpty) {
+                                          payload['doc_id'] = docId;
+                                          print('DEBUG: Using doc_id: $docId for document: $fileName');
+                                        } else {
+                                          payload['filename'] = fileName;
+                                          print('DEBUG: No doc_id found, using filename: $fileName');
+                                        }
+                                        
+                                        // Add file_path to the payload if available
+                                        if (filePath.isNotEmpty) {
+                                          payload['file_path'] = filePath;
+                                          print('DEBUG: Adding file_path: $filePath to update payload');
+                                        }
+                                        
+                                        // Add all the other settings
+                                        payload['copies'] = docState.copies;
+                                        payload['pages_selection'] = docState.pagesSelection;
+                                        payload['orientation'] = docState.orientation;
+                                        payload['grayscale'] = docState.grayscale;
+                                        payload['paper_size'] = docState.getSimplifiedPaperSize();
+                                        payload['paper_quality'] = docState.paperQuality.startsWith('70') ? '70' : '80';
                                         updatedSettings.add(payload);
                                       }
                                     }
                                     
                                     // Send all settings to the API
-                                    final url = Uri.parse('http://192.168.1.205:8080/api/update-document-settings/');
+                                    final url = Uri.parse('http://192.168.1.205:8080/api/flutter-update-document-settings/');
                                     
                                     // Prepare headers with CSRF token
                                     final headers = {
@@ -401,14 +418,21 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                                       headers['X-CSRFToken'] = SessionService.instance.csrfToken!;
                                     }
                                     
-                                    // Prepare body with session key
+                                    // Prepare body with the new format
                                     final Map<String, dynamic> body = {
-                                      'documents': updatedSettings,
+                                      'updates': updatedSettings,
                                     };
                                     
                                     if (SessionService.instance.sessionKey != null) {
                                       body['session_key'] = SessionService.instance.sessionKey!;
+                                      body['upload_session_key'] = SessionService.instance.sessionKey!;
+                                      
+                                      print('DEBUG: Using consistent session key for update-document-settings: ${SessionService.instance.sessionKey}');
                                     }
+                                    
+                                    // Debug log for the new request format
+                                    print('DEBUG: Sending update settings request with new format');
+                                    print('DEBUG: Request body: ${jsonEncode(body)}');
                                     
                                     // Create logging client and send request
                                     final client = LoggingHttpClient(http.Client());
@@ -424,7 +448,14 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                                       try {
                                         final responseData = jsonDecode(response.body);
                                         if (responseData['session_key'] != null) {
-                                          await SessionService.instance.setSessionKey(responseData['session_key']);
+                                          // Log but don't update our session key to keep it consistent
+                                          print('DEBUG: Server returned session_key: ${responseData['session_key']}');
+                                          // Validate it matches our stable session key
+                                          if (responseData['session_key'] != SessionService.instance.sessionKey) {
+                                            print('DEBUG: Warning - Server returned different session key than our stored one');
+                                          } else {
+                                            print('DEBUG: Session key consistent with server');
+                                          }
                                         }
                                       } catch (e) {
                                         print('Error parsing settings update response: $e');
@@ -435,16 +466,86 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                                       throw Exception('Failed to update settings: ${response.statusCode}');
                                     }
                                     
-                                    double totalAmount = 45.00;
-                                    if (mounted) {
-                                      Navigator.of(context).pushReplacement(
-                                        MaterialPageRoute(
-                                          builder: (context) => PaymentPage(
-                                            uploadedFiles: widget.uploadedFiles,
-                                            totalAmount: totalAmount,
+                                    // Step 2: Get final confirmation and pricing
+                                    final confirmUrl = Uri.parse('http://192.168.1.205:8080/api/flutter-confirmation/');
+                                    
+                                    final Map<String, dynamic> confirmBody = {};
+                                    
+                                    // Include session key if available
+                                    if (SessionService.instance.sessionKey != null) {
+                                      confirmBody['session_key'] = SessionService.instance.sessionKey!;
+                                      confirmBody['upload_session_key'] = SessionService.instance.sessionKey!;
+                                      
+                                      print('DEBUG: Using consistent session key for flutter-confirmation: ${SessionService.instance.sessionKey}');
+                                    }
+                                    
+                                    // Include customer ID if available
+                                    if (widget.customerId != null) {
+                                      confirmBody['customer_id'] = widget.customerId!;
+                                    }
+                                    
+                                    print('DEBUG: Sending confirmation request');
+                                    print('DEBUG: Confirmation body: ${jsonEncode(confirmBody)}');
+                                    
+                                    final confirmResponse = await client.post(
+                                      confirmUrl,
+                                      headers: headers,
+                                      body: jsonEncode(confirmBody),
+                                    );
+                                    client.close();
+                                    
+                                    if (confirmResponse.statusCode != 200) {
+                                      throw Exception('Failed to get confirmation: ${confirmResponse.statusCode}');
+                                    }
+                                    
+                                    print('DEBUG: Confirmation successful');
+                                    print('DEBUG: Confirm response: ${confirmResponse.body}');
+                                    
+                                    // Parse the confirmation response
+                                    final confirmData = jsonDecode(confirmResponse.body);
+                                    
+                                    if (confirmData['success'] == true) {
+                                      // Get data from confirmation response
+                                      double totalAmount = confirmData['total_price'] != null ? 
+                                          confirmData['total_price'].toDouble() : 45.00;
+                                      
+                                      List<Map<String, dynamic>> documents = [];
+                                      if (confirmData['documents'] != null) {
+                                        for (var doc in confirmData['documents']) {
+                                          // Convert document to map and ensure we preserve all fields
+                                          Map<String, dynamic> docMap = doc as Map<String, dynamic>;
+                                          
+                                          // Debug log for document data from API
+                                          print('DEBUG: Document from confirmation API: $docMap');
+                                          
+                                          documents.add(docMap);
+                                        }
+                                        
+                                        print('DEBUG: Number of documents from confirmation API: ${documents.length}');
+                                      } else {
+                                        documents = widget.uploadedFiles;
+                                        print('DEBUG: Using original uploaded files as no documents returned from API');
+                                      }
+                                      
+                                      // Check for file paths in documents
+                                      for (var doc in documents) {
+                                        final filePath = doc['file_path']?.toString() ?? 'not-present';
+                                        final docId = doc['doc_id']?.toString() ?? 'not-present';
+                                        print('DEBUG: Document with ID: $docId has file_path: $filePath');
+                                      }
+                                      
+                                      if (mounted) {
+                                        Navigator.of(context).pushReplacement(
+                                          MaterialPageRoute(
+                                            builder: (context) => PaymentPage(
+                                              uploadedFiles: documents,
+                                              totalAmount: totalAmount,
+                                            ),
                                           ),
-                                        ),
-                                      );
+                                        );
+                                      }
+                                    } else {
+                                      throw Exception('Confirmation response indicated failure');
                                     }
                                   } catch (e) {
                                     ScaffoldMessenger.of(context).showSnackBar(

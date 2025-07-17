@@ -563,7 +563,11 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
       };
       
       if (SessionService.instance.sessionKey != null) {
+        // Include both session keys - the one Django expects for upload paths and our internal one
         body['session_key'] = SessionService.instance.sessionKey!;
+        body['upload_session_key'] = SessionService.instance.sessionKey!;
+        
+        print('DEBUG: Using consistent session key for uploads: ${SessionService.instance.sessionKey}');
       }
       
       print('DEBUG: Sending finalize request with body: ${jsonEncode(body)}');
@@ -589,9 +593,15 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
           final bool isSuccess = responseData['success'] == true;
           
           if (isSuccess) {
-            // Update session key if provided
+            // Log session key from response but don't update our stable one
             if (responseData['session_key'] != null) {
-              await SessionService.instance.setSessionKey(responseData['session_key']);
+              print('DEBUG: Server returned session_key: ${responseData['session_key']}');
+              // Instead of updating, we validate the existing session key is being used
+              if (responseData['session_key'] != SessionService.instance.sessionKey) {
+                print('DEBUG: Warning - Server returned different session key than our stored one');
+              } else {
+                print('DEBUG: Session key consistent with server');
+              }
             }
             
             // Extract customer ID if available

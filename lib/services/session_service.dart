@@ -29,11 +29,31 @@ class SessionService {
   String? get sessionKey => _sessionKey;
   Map<String, String> get cookies => _cookies;
   
+  // Generate a UUID string for consistent session keys
+  String _generateUUID() {
+    // Simple implementation since we can't import uuid package directly
+    // This creates a timestamp-based pseudo-UUID
+    final now = DateTime.now().microsecondsSinceEpoch;
+    final random = now.toString() + DateTime.now().millisecond.toString();
+    final hexString = random.hashCode.toRadixString(16).padLeft(8, '0');
+    return '${hexString.substring(0, 8)}-${hexString.substring(0, 4)}-${hexString.substring(0, 4)}-${hexString.substring(0, 4)}-${hexString.substring(0, 12)}';
+  }
+
   // Load from storage on app start
   Future<void> loadFromStorage() async {
     final prefs = await SharedPreferences.getInstance();
     _csrfToken = prefs.getString(_csrfTokenKey);
     _sessionKey = prefs.getString(_sessionKeyKey);
+    
+    // If we don't have a session key, generate one and store it
+    // This ensures the same session key is used across app sessions
+    if (_sessionKey == null || _sessionKey!.isEmpty) {
+      // Generate and save a persistent session key that will be used for file paths
+      await setSessionKey(_generateUUID());
+      print('DEBUG: Generated new session key: $_sessionKey');
+    } else {
+      print('DEBUG: Using existing session key: $_sessionKey');
+    }
     
     // If we don't have a CSRF token, try to get one from the server
     if (_csrfToken == null || _csrfToken!.isEmpty) {
@@ -147,9 +167,28 @@ class SessionService {
   Future<void> setSessionKey(String? key) async {
     if (key == null || key.isEmpty) return;
     
+    // Check if we already have a session key - prefer keeping the existing one
+    // unless forced to update with forceUpdate parameter
+    if (_sessionKey == null || _sessionKey!.isEmpty) {
+      _sessionKey = key;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_sessionKeyKey, key);
+      print('DEBUG: Session key set: $_sessionKey');
+    } else {
+      // If server returns a new session key, log it but don't replace our stable key
+      // This ensures file paths remain consistent
+      print('DEBUG: Server provided new session key ($key) but keeping existing key ($_sessionKey) for consistency');
+    }
+  }
+  
+  // Use this method when you explicitly need to update the session key
+  Future<void> forceUpdateSessionKey(String? key) async {
+    if (key == null || key.isEmpty) return;
+    
     _sessionKey = key;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_sessionKeyKey, key);
+    print('DEBUG: Session key forcefully updated to: $_sessionKey');
   }
   
   // Clear session data
@@ -184,6 +223,7 @@ class SessionService {
   Map<String, dynamic> addSessionToBody(Map<String, dynamic> body) {
     if (_sessionKey != null) {
       body['session_key'] = _sessionKey!;
+      body['upload_session_key'] = _sessionKey!; // Add the key Django expects
     }
     return body;
   }

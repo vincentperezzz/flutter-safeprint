@@ -22,7 +22,17 @@ class _PaymentPageState extends State<PaymentPage> {
   @override
   void initState() {
     super.initState();
-    _customerId = _generateCustomerId();
+    // Check if any document contains a customer_id, otherwise generate one
+    String? customerIdFromDocs;
+    
+    for (var doc in widget.uploadedFiles) {
+      if (doc.containsKey('customer_id') && doc['customer_id'] != null) {
+        customerIdFromDocs = doc['customer_id'].toString();
+        break;
+      }
+    }
+    
+    _customerId = customerIdFromDocs ?? _generateCustomerId();
   }
 
   String _generateCustomerId() {
@@ -30,8 +40,44 @@ class _PaymentPageState extends State<PaymentPage> {
     return "#CID-${ms.substring(ms.length - 4)}";
   }
 
-  String _generateDocumentId(String fileName, int index) {
+  String _getDocumentId(Map<String, dynamic> doc, int index) {
+    // Use doc_id from API if available, otherwise generate one
+    if (doc.containsKey('doc_id') && doc['doc_id'] != null && doc['doc_id'].toString().isNotEmpty) {
+      String docId = doc['doc_id'].toString();
+      // Add # prefix if not present
+      return docId.startsWith('#') ? docId : '#$docId';
+    }
     return "#DOC-${1001 + index}";
+  }
+  
+  double _calculateTotalAmount() {
+    // Use the total_amount from API if available in the documents
+    for (var doc in widget.uploadedFiles) {
+      if (doc.containsKey('total_amount') && doc['total_amount'] != null) {
+        try {
+          return double.parse(doc['total_amount'].toString());
+        } catch (e) {
+          print('Error parsing total_amount: $e');
+        }
+      }
+    }
+    
+    // If no total_amount found, calculate based on individual document prices
+    double total = 0.0;
+    for (var doc in widget.uploadedFiles) {
+      if (doc.containsKey('price') && doc['price'] != null) {
+        try {
+          total += double.parse(doc['price'].toString());
+        } catch (e) {
+          total += 2.0; // Default price
+        }
+      } else {
+        total += 2.0; // Default price
+      }
+    }
+    
+    // Fallback to the passed totalAmount if no prices found
+    return total > 0 ? total : widget.totalAmount;
   }
 
   void _sendFeedback() {
@@ -260,7 +306,9 @@ class _PaymentPageState extends State<PaymentPage> {
                                           maxLines: 1,
                                         ),
                                         Text(
-                                          "₱2.00",
+                                          doc.containsKey('price') && doc['price'] != null
+                                              ? "₱${doc['price'].toString()}"
+                                              : "₱2.00", // Fallback price
                                           style: const TextStyle(
                                             fontFamily: 'SpaceGrotesk',
                                             color: Colors.grey,
@@ -273,7 +321,7 @@ class _PaymentPageState extends State<PaymentPage> {
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
-                                    _generateDocumentId(doc['filename'] ?? '', index),
+                                    _getDocumentId(doc, index),
                                     style: const TextStyle(
                                       fontFamily: 'SpaceGrotesk',
                                       fontWeight: FontWeight.w600,
@@ -301,7 +349,7 @@ class _PaymentPageState extends State<PaymentPage> {
                       child: Column(
                         children: [
                           Text(
-                            "₱${widget.totalAmount.toStringAsFixed(2)}",
+                            "₱${_calculateTotalAmount().toStringAsFixed(2)}",
                             style: const TextStyle(
                               fontFamily: 'SpaceGrotesk',
                               fontWeight: FontWeight.w900,
