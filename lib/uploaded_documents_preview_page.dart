@@ -8,10 +8,12 @@ import 'services/http_logger.dart';
 
 class UploadedDocumentsPreviewPage extends StatefulWidget {
   final List<Map<String, dynamic>> uploadedFiles;
+  final String? customerId;
 
   const UploadedDocumentsPreviewPage({
     super.key,
     required this.uploadedFiles,
+    this.customerId,
   });
 
   @override
@@ -22,6 +24,24 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
   bool _isLoading = false;
   // Map to store references to document state controllers
   final Map<String, _DocumentPreviewItemState> _documentStates = {};
+  
+  @override
+  void initState() {
+    super.initState();
+    // Debug the files being passed to this page
+    print('DEBUG: UploadedDocumentsPreviewPage received ${widget.uploadedFiles.length} files');
+    print('DEBUG: Customer ID: ${widget.customerId ?? "No customer ID"}');
+    for (var i = 0; i < widget.uploadedFiles.length; i++) {
+      print('DEBUG: File $i: ${widget.uploadedFiles[i]}');
+    }
+    
+    // Force a redraw after a short delay to ensure UI updates
+    if (widget.uploadedFiles.isNotEmpty) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) setState(() {});
+      });
+    }
+  }
 
   // Method to register document state controllers
   void _registerDocumentState(String fileName, _DocumentPreviewItemState state) {
@@ -82,24 +102,137 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                         fontSize: 18,
                       ),
                     ),
+                    // Customer ID display has been hidden as requested
+                    
                     const SizedBox(height: 20),
 
+                    // Show message if no documents
+                    if (widget.uploadedFiles.isEmpty) 
+                      Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Column(
+                            children: [
+                              const Icon(
+                                Icons.info_outline,
+                                size: 60,
+                                color: Color(0xFFFBB41D),
+                              ),
+                              const SizedBox(height: 20),
+                              const Text(
+                                "No documents available for preview",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontFamily: 'SpaceGrotesk',
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 10),
+                              const Text(
+                                "Your files were uploaded but the server didn't return any processed documents. This could be due to processing issues or unsupported file formats.",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontFamily: 'SpaceGrotesk',
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 20),
+                              const Text(
+                                "Please try again with different PDF files.",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontFamily: 'SpaceGrotesk',
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.blue,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 30),
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop({'clearPreviousFiles': true}); // Go back to upload page and clear files
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFFBB41D),
+                                  foregroundColor: Colors.black,
+                                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    side: const BorderSide(color: Colors.black, width: 1),
+                                  ),
+                                ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.arrow_back, size: 18),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      "Return",
+                                      style: TextStyle(
+                                        fontFamily: 'SpaceGrotesk',
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      
                     // Documents list
                     ...widget.uploadedFiles.asMap().entries.map((entry) {
                       final i = entry.key;
                       final doc = entry.value;
+                      // Generate a unique key for each document - fallback to index if filename is missing
+                      final keyValue = doc['filename'] != null ? 'doc-${doc['filename']}' : 'doc-$i';
+                      
+                      // Debug log for document metadata
+                      print('DEBUG: Rendering document $i with metadata: ${doc}');
+                      
                       return DocumentPreviewItem(
-                        key: ValueKey('doc-${doc['filename']}'),
-                        fileName: doc['filename'] ?? '',
+                        key: ValueKey(keyValue),
+                        fileName: doc['filename'] ?? 'Document ${i + 1}',
                         fileSize: _formatFileSize(doc['file_size'] ?? 0),
                         numPages: doc['num_pages']?.toString() ?? '-',
                         orientation: doc['orientation']?.toString() ?? '-',
                         paperSize: doc['paper_size']?.toString() ?? '-',
+                        paperQuality: doc['paper_quality']?.toString() ?? '-',
+                        colorMode: doc['color_mode']?.toString() ?? '-',
+                        storedName: doc['stored_name']?.toString() ?? '-',
+                        docId: doc['doc_id']?.toString() ?? '-',
+                        originalName: doc['original_name']?.toString() ?? '-',
+                        filePath: doc['file_path']?.toString() ?? '-',
                         onRemove: () async {
-                          final filename = doc['filename'] ?? '';
-                          final docId = doc['doc_id'] ?? '';
+                          // Get document information
+                          final String filename = doc['filename'] ?? '';
                           
                           try {
+                            // Debug the document data to see what's available
+                            print('DEBUG: Document to delete: $doc');
+                            
+                            // Get the file_path directly from the document data
+                            // This is returned by the flutter-finalize-uploads API
+                            String filePath = '';
+                            
+                            if (doc.containsKey('file_path') && doc['file_path'] != null && doc['file_path'].toString().isNotEmpty) {
+                              filePath = doc['file_path'].toString();
+                              print('DEBUG: Using file_path from API: $filePath');
+                            } else {
+                              print('DEBUG: No file_path found in document data');
+                            }
+                            
+                            print('DEBUG: File path for deletion: $filePath');
+                            
+                            // Validate file path
+                            if (filePath.isEmpty) {
+                              throw Exception('Cannot delete file: Unable to determine file path');
+                            }
+                            
                             // Make API call to delete the file
                             final uri = Uri.parse('http://192.168.1.205:8080/api/delete-file/');
                             
@@ -112,16 +245,20 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                               headers['X-CSRFToken'] = SessionService.instance.csrfToken!;
                             }
                             
-                            // Prepare body with session key
-                            final body = {
-                              'filename': filename,
+                            // Prepare body with file_path as requested by API
+                            final body = <String, dynamic>{
+                              'file_path': filePath,
                             };
                             
-                            // Add doc_id if available
-                            if (docId.isNotEmpty) {
-                              body['doc_id'] = docId;
+                            // Add debug log for the body
+                            print('DEBUG: Delete request body: ${jsonEncode(body)}');
+                            
+                            // Add doc_id to the request for server-side reference
+                            if (doc.containsKey('doc_id') && doc['doc_id'] != null) {
+                              body['doc_id'] = doc['doc_id'].toString();
                             }
                             
+                            // Add session key if available
                             if (SessionService.instance.sessionKey != null) {
                               body['session_key'] = SessionService.instance.sessionKey!;
                             }
@@ -135,6 +272,14 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                             );
                             client.close();
                             
+                            // Regardless of response, remove from UI for better UX
+                            setState(() {
+                              // Remove from document states map
+                              _documentStates.remove(filename);
+                              // Remove from uploadedFiles list
+                              widget.uploadedFiles.removeAt(i);
+                            });
+                            
                             if (response.statusCode == 200) {
                               // Parse response for updated session key
                               try {
@@ -146,39 +291,50 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                                 print('Error parsing delete response: $e');
                               }
                               
-                              // Only update UI if deletion was successful
-                              setState(() {
-                                // Remove from document states map
-                                _documentStates.remove(filename);
-                                // Remove from uploadedFiles list
-                                widget.uploadedFiles.removeAt(i);
-                              });
-                              
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('File $filename deleted successfully'),
+                                  content: Text('File deleted successfully'),
                                   backgroundColor: Colors.green,
                                 ),
                               );
-                              
-                              if (widget.uploadedFiles.isEmpty) {
-                                Navigator.of(context).pop(); // Go back to previous (main) page
-                              }
-                            } else {
+                            } else if (response.statusCode == 404) {
+                              // File not found, but we already removed it from UI
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('Failed to delete file: ${response.statusCode}'),
-                                  backgroundColor: Colors.red,
+                                  content: Text('File not found on server, removed from view'),
+                                  backgroundColor: Colors.orange,
+                                ),
+                              );
+                            } else {
+                              // Other error, but we keep UI updated
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Server notification: ${response.statusCode}'),
+                                  backgroundColor: Colors.orange,
                                 ),
                               );
                             }
+                            
+                            if (widget.uploadedFiles.isEmpty) {
+                              // Navigate back to main page with a flag to clear previous files
+                              Navigator.of(context).pop({'clearPreviousFiles': true});
+                            }
                           } catch (e) {
+                            // Error handling for any exceptions
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text('Error deleting file: $e'),
                                 backgroundColor: Colors.red,
                               ),
                             );
+                            
+                            // Even if there's an error, we should still update the UI
+                            setState(() {
+                              // Remove from document states map
+                              _documentStates.remove(filename);
+                              // Remove from uploadedFiles list
+                              widget.uploadedFiles.removeAt(i);
+                            });
                           }
                         },
                       );
@@ -202,7 +358,7 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                           ],
                         ),
                         child: ElevatedButton(
-                          onPressed: _isLoading
+                          onPressed: (_isLoading || widget.uploadedFiles.isEmpty)
                               ? null
                               : () async {
                                   setState(() {
@@ -225,8 +381,8 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                                           'pages_selection': docState.pagesSelection,
                                           'orientation': docState.orientation,
                                           'grayscale': docState.grayscale,
-                                          'paper_size': docState.paperSize,
-                                          'paper_quality': docState.paperQuality,
+                                          'paper_size': docState.getSimplifiedPaperSize(),
+                                          'paper_quality': docState.paperQuality.startsWith('70') ? '70' : '80',
                                         };
                                         updatedSettings.add(payload);
                                       }
@@ -351,6 +507,12 @@ class DocumentPreviewItem extends StatefulWidget {
   final String numPages;
   final String orientation;
   final String paperSize;
+  final String paperQuality;
+  final String colorMode;
+  final String storedName;
+  final String docId;
+  final String originalName;
+  final String filePath;
   final VoidCallback onRemove;
 
   const DocumentPreviewItem({
@@ -360,6 +522,12 @@ class DocumentPreviewItem extends StatefulWidget {
     required this.numPages,
     required this.orientation,
     required this.paperSize,
+    required this.paperQuality,
+    required this.colorMode,
+    required this.storedName,
+    required this.docId,
+    required this.originalName,
+    required this.filePath,
     required this.onRemove,
   });
 
@@ -384,9 +552,52 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
     if (widget.orientation.isNotEmpty && widget.orientation != '-') {
       orientation = widget.orientation;
     }
-    if (widget.paperSize.isNotEmpty && widget.paperSize != '-') {
-      paperSize = widget.paperSize;
+    
+    // Initialize grayscale value based on colorMode
+    if (widget.colorMode.isNotEmpty && widget.colorMode != '-') {
+      // If colorMode is "bw", set grayscale to true
+      grayscale = (widget.colorMode.toLowerCase() == "bw");
     }
+    
+    // Initialize paper size from API value
+    if (widget.paperSize.isNotEmpty && widget.paperSize != '-') {
+      // Map the API paper size to our UI presentation format
+      switch (widget.paperSize) {
+        case "Long":
+          paperSize = "Long (8.5×13in)";
+          break;
+        case "Letter":
+          paperSize = "Letter (8.5×11in)";
+          break;
+        case "A4":
+          paperSize = "A4 (8.3×11.7in)";
+          break;
+        default:
+          paperSize = widget.paperSize.contains("×") ? widget.paperSize : "Letter (8.5×11in)";
+      }
+    }
+    
+    // Initialize paper quality from API value
+    if (widget.paperQuality.isNotEmpty && widget.paperQuality != '-') {
+      // API returns just the number (e.g. "70" or "80")
+      if (widget.paperQuality == "70") {
+        paperQuality = "70 GSM (thinner)";
+      } else if (widget.paperQuality == "80") {
+        paperQuality = "80 GSM (thicker)";
+      }
+    }
+  }
+  
+  // Get the simplified paper size (for API)
+  String getSimplifiedPaperSize() {
+    if (paperSize.contains("Long")) {
+      return "Long";
+    } else if (paperSize.contains("Letter")) {
+      return "Letter";
+    } else if (paperSize.contains("A4")) {
+      return "A4";
+    }
+    return paperSize;
   }
   
   @override
@@ -648,7 +859,9 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
                         ),
                       )
                     : Text(
-                        "1-3",
+                        widget.numPages.isNotEmpty && widget.numPages != '-' 
+                            ? "1-${widget.numPages}" 
+                            : "1-3",
                         style: TextStyle(
                           fontFamily: 'SpaceGrotesk',
                           color: Colors.grey[400],
@@ -710,32 +923,62 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
             ),
           ),
           const SizedBox(height: 6),
-          DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              isExpanded: true,
-              value: paperSize,
-              items: [
-                "Long (8.5×13in)",
-                "Letter (8.5×11in)",
-                "A4 (8.3×11.7in)"
-              ].map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(
-                    value,
-                    style: const TextStyle(
-                      fontFamily: 'SpaceGrotesk',
-                      color: Colors.black,
-                      fontSize: 15,
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: Colors.black),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 12.0),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        isExpanded: true,
+                        value: paperSize,
+                        items: [
+                          "Long (8.5×13in)",
+                          "Letter (8.5×11in)",
+                          "A4 (8.3×11.7in)"
+                        ].map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(
+                              value,
+                              style: const TextStyle(
+                                fontFamily: 'SpaceGrotesk',
+                                color: Colors.black,
+                                fontSize: 15,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          if (newValue != null) {
+                            setState(() => paperSize = newValue);
+                          }
+                        },
+                        icon: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFFFB800),
+                            borderRadius: BorderRadius.only(
+                              topRight: Radius.circular(13),
+                              bottomRight: Radius.circular(13),
+                            ),
+                          ),
+                          child: const Icon(Icons.keyboard_arrow_down, color: Colors.black),
+                        ),
+                        dropdownColor: Colors.white,
+                        elevation: 2,
+                      ),
                     ),
                   ),
-                );
-              }).toList(),
-              onChanged: (String? newValue) {
-                if (newValue != null) {
-                  setState(() => paperSize = newValue);
-                }
-              },
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 16),
@@ -749,34 +992,63 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
             ),
           ),
           const SizedBox(height: 6),
-          DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              isExpanded: true,
-              value: paperQuality,
-              items: [
-                "70 GSM (thinner)",
-                "80 GSM (thicker)"
-              ].map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(
-                    value,
-                    style: const TextStyle(
-                      fontFamily: 'SpaceGrotesk',
-                      color: Colors.black,
-                      fontSize: 15,
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: Colors.black),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 12.0),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        isExpanded: true,
+                        value: paperQuality,
+                        items: [
+                          "70 GSM (thinner)",
+                          "80 GSM (thicker)"
+                        ].map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(
+                              value,
+                              style: const TextStyle(
+                                fontFamily: 'SpaceGrotesk',
+                                color: Colors.black,
+                                fontSize: 15,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          if (newValue != null) {
+                            setState(() => paperQuality = newValue);
+                          }
+                        },
+                        icon: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFFFB800),
+                            borderRadius: BorderRadius.only(
+                              topRight: Radius.circular(13),
+                              bottomRight: Radius.circular(13),
+                            ),
+                          ),
+                          child: const Icon(Icons.keyboard_arrow_down, color: Colors.black),
+                        ),
+                        dropdownColor: Colors.white,
+                        elevation: 2,
+                      ),
                     ),
                   ),
-                );
-              }).toList(),
-              onChanged: (String? newValue) {
-                if (newValue != null) {
-                  setState(() => paperQuality = newValue);
-                }
-              },
+                ),
+              ],
             ),
           ),
-          // Removed Save Settings button as requested
         ],
       ),
     );

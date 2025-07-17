@@ -347,6 +347,9 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
       if (SessionService.instance.cookies['sessionid'] != null) {
         request.headers['Cookie'] = 'sessionid=${SessionService.instance.cookies['sessionid']}';
       }
+      
+      // Log the file info being sent
+      print('DEBUG: Sending file: ${file.name}, size: ${file.size}');
             
       if (file.bytes != null) {
         request.files.add(
@@ -469,6 +472,14 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
         body['session_key'] = SessionService.instance.sessionKey!;
       }
       
+      // Always remove the file from UI for better UX
+      setState(() {
+        if (index < _selectedFiles.length) {
+          _selectedFiles.removeAt(index);
+        }
+        _uploadedFileInfos.removeAt(index);
+      });
+      
       // Create logging client and send request
       final client = LoggingHttpClient(http.Client());
       final response = await client.post(
@@ -488,11 +499,6 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
           print('Error parsing delete response: $e');
         }
         
-        // Only remove from UI if deletion was successful on server
-        setState(() {
-          _selectedFiles.removeAt(index);
-          _uploadedFileInfos.removeAt(index);
-        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('File ${fileInfo['original_name']} deleted successfully'),
@@ -500,17 +506,19 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
           ),
         );
       } else {
+        // Even if API call fails, we keep the file removed from UI
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to delete file: ${response.statusCode}'),
-            backgroundColor: Colors.red,
+            content: Text('Server notification: ${response.statusCode}'),
+            backgroundColor: Colors.orange,
           ),
         );
       }
     } catch (e) {
+      // Continue with UI already updated, just show the error
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error deleting file: $e'),
+          content: Text('Error while processing: $e'),
           backgroundColor: Colors.red,
         ),
       );
@@ -534,7 +542,7 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
 
     // Finalize uploads before navigating
     try {
-      final finalizeUri = Uri.parse('http://192.168.1.205:8080/api/finalize-uploads/');
+      final finalizeUri = Uri.parse('http://192.168.1.205:8080/api/flutter-finalize-uploads/');
       
       // Prepare headers with CSRF token
       final headers = {
@@ -545,12 +553,20 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
         headers['X-CSRFToken'] = SessionService.instance.csrfToken!;
       }
       
-      // Prepare body with session key
-      final body = {};
+      // Prepare body with session key and file information
+      final body = <String, dynamic>{
+        'files': _uploadedFileInfos.map((file) => {
+          'file_path': file['file_path'],
+          'original_name': file['original_name'],
+          'file_size': file['file_size'],
+        }).toList(),
+      };
       
       if (SessionService.instance.sessionKey != null) {
         body['session_key'] = SessionService.instance.sessionKey!;
       }
+      
+      print('DEBUG: Sending finalize request with body: ${jsonEncode(body)}');
       
       // Create logging client and send request
       final client = LoggingHttpClient(http.Client());
@@ -563,34 +579,136 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
       if (response.statusCode == 200) {
         // Parse processed documents from the response
         final List<Map<String, dynamic>> processedDocs = [];
+        Map<String, dynamic> responseData = {};
+        
         try {
-          final responseData = jsonDecode(response.body);
+          responseData = jsonDecode(response.body);
+          print('DEBUG: Finalize response: ${response.body}');
           
-          // Update session key if provided
-          if (responseData['session_key'] != null) {
-            await SessionService.instance.setSessionKey(responseData['session_key']);
-          }
+          // Check for success flag in the response
+          final bool isSuccess = responseData['success'] == true;
           
-          if (responseData['documents'] != null && responseData['documents'] is List) {
-            for (final doc in responseData['documents']) {
-              processedDocs.add(Map<String, dynamic>.from(doc));
+          if (isSuccess) {
+            // Update session key if provided
+            if (responseData['session_key'] != null) {
+              await SessionService.instance.setSessionKey(responseData['session_key']);
+            }
+            
+            // Extract customer ID if available
+            String? customerId = responseData['customer_id']?.toString();
+            print('DEBUG: Customer ID: $customerId');
+            
+            if (responseData['documents'] != null && responseData['documents'] is List) {
+              for (final doc in responseData['documents']) {
+                processedDocs.add(Map<String, dynamic>.from(doc));
+              }
+              print('DEBUG: Processed docs count: ${processedDocs.length}');
+              print('DEBUG: First document data: ${processedDocs.isNotEmpty ? processedDocs.first : "No documents"}');
+            } else {
+              print('DEBUG: No documents found in response or wrong structure');
+            }
+          } else {
+            // Handle error case for unsupported files
+            String errorMessage = responseData['error'] ?? 'Unknown error processing files';
+            print('DEBUG: Error from API: $errorMessage');
+            
+            // Check for paper size errors
+            if (responseData['paper_size_errors'] != null && responseData['paper_size_errors'] is List) {
+              List<dynamic> paperSizeErrors = responseData['paper_size_errors'];
+              for (var error in paperSizeErrors) {
+                print('DEBUG: File ${error['file']} error: ${error['reason']}');
+              }
+              
+              // Show specific message for paper size errors
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Unsupported paper size detected: $errorMessage'),
+                  backgroundColor: Colors.orange,
+                  duration: const Duration(seconds: 5),
+                ),
+              );
+              
+              setState(() {
+                _selectedFiles.clear();
+                _isUploading = false;
+              });
+              
+              // Return to main page without navigating to preview
+              return;
             }
           }
         } catch (e) {
           print('Error parsing finalize response: $e');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error processing response: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
         }
+        
+        // Get customer ID from response
+        String? customerId = responseData['customer_id']?.toString();
         
         setState(() {
           _selectedFiles.clear();
           _isUploading = false;
         });
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => UploadedDocumentsPreviewPage(
-              uploadedFiles: processedDocs,
+        
+        // Handle navigation based on available documents
+        if (processedDocs.isEmpty) {
+          // Show a user-friendly message
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Your files were uploaded but no documents were processed. Please try again with different files.'),
+              backgroundColor: Colors.orange,
+              duration: Duration(seconds: 5),
             ),
-          ),
-        );
+          );
+          
+          // Navigate anyway to show the empty state
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => UploadedDocumentsPreviewPage(
+                uploadedFiles: processedDocs,
+                customerId: customerId,
+              ),
+            ),
+          ).then((result) {
+            // Check if we need to clear the previous files when returning
+            if (result != null && result is Map && result['clearPreviousFiles'] == true) {
+              setState(() {
+                _selectedFiles.clear();
+                _uploadedFileInfos.clear();
+              });
+            }
+          });
+        } else {
+          // We have documents - ensure required fields
+          for (var doc in processedDocs) {
+            // Set defaults for any missing fields
+            doc['filename'] ??= 'Unnamed Document';
+            doc['file_size'] ??= 0;
+            // Other fields will use default values from the DocumentPreviewItem
+          }
+          
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => UploadedDocumentsPreviewPage(
+                uploadedFiles: processedDocs,
+                customerId: customerId,
+              ),
+            ),
+          ).then((result) {
+            // Check if we need to clear the previous files when returning
+            if (result != null && result is Map && result['clearPreviousFiles'] == true) {
+              setState(() {
+                _selectedFiles.clear();
+                _uploadedFileInfos.clear();
+              });
+            }
+          });
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -621,6 +739,8 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
     int i = (bytes.bitLength - 1) ~/ 10;
     return "${(bytes / (1 << (i * 10))).toStringAsFixed(1)} ${suffixes[i]}";
   }
+  
+  // Build implementation
   @override
   Widget build(BuildContext context) {
     if (_isInitializing) {
