@@ -9,8 +9,18 @@ import 'faq_page.dart';
 import 'about_us_page.dart';
 import 'uploaded_documents_preview_page.dart';
 import 'package:http_parser/http_parser.dart';
+import 'services/session_service.dart';
+import 'services/http_logger.dart';
 
-void main() => runApp(const SampleApp());
+void main() async {
+  // Ensure Flutter is initialized
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize session service
+  await SessionService.instance.loadFromStorage();
+  
+  runApp(const SampleApp());
+}
 
 class SampleApp extends StatefulWidget {
   const SampleApp({super.key});
@@ -247,6 +257,36 @@ class MediaUploadPage extends StatefulWidget {
 class _MediaUploadPageState extends State<MediaUploadPage> {
   List<PlatformFile> _selectedFiles = [];
   bool _isUploading = false;
+  bool _isInitializing = true;
+  
+  @override
+  void initState() {
+    super.initState();
+    _initializeSession();
+  }
+  
+  Future<void> _initializeSession() async {
+    setState(() {
+      _isInitializing = true;
+    });
+    
+    try {
+      // Load session data from storage and initialize CSRF if needed
+      // This will fetch the CSRF token from the homepage if not found in storage
+      await SessionService.instance.loadFromStorage();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to initialize session: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        _isInitializing = false;
+      });
+    }
+  }
 
   Future<void> _pickFiles() async {
     try {
@@ -260,13 +300,14 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
         setState(() {
           _selectedFiles.addAll(result.files);
         });
-        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${result.files.length} file(s) selected'),
             backgroundColor: Colors.green,
           ),
         );
+        // Automatically upload files after selection
+        await _autoUploadFiles(result.files);
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -278,10 +319,192 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
     }
   }
 
-  void _removeFile(int index) {
-    setState(() {
-      _selectedFiles.removeAt(index);
-    });
+  Future<void> _autoUploadFiles(List<PlatformFile> files) async {
+    // Check if we have a CSRF token, if not, fetch it
+    if (SessionService.instance.csrfToken == null) {
+      await SessionService.instance.fetchCsrfTokenFromHomePage();
+    }
+    
+    for (final file in files) {
+      final uri = Uri.parse('http://192.168.1.205:8080/api/upload-file/');
+      final request = http.MultipartRequest('POST', uri);
+      
+      // Add CSRF token header
+      if (SessionService.instance.csrfToken != null) {
+        request.headers['X-CSRFToken'] = SessionService.instance.csrfToken!;
+        // Add csrfmiddlewaretoken field for Django form compatibility
+        request.fields['csrfmiddlewaretoken'] = SessionService.instance.csrfToken!;
+      }
+      
+      // Add session key as a field and header
+      if (SessionService.instance.sessionKey != null) {
+        request.fields['session_key'] = SessionService.instance.sessionKey!;
+        request.headers['Session-Key'] = SessionService.instance.sessionKey!;
+      }
+
+      // Add sessionid cookie to match browser behavior
+      if (SessionService.instance.cookies['sessionid'] != null) {
+        request.headers['Cookie'] = 'sessionid=${SessionService.instance.cookies['sessionid']}';
+      }
+            
+      if (file.bytes != null) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'file',
+            file.bytes!,
+            filename: file.name,
+            contentType: MediaType('application', 'pdf'),
+          ),
+        );
+      } else if (file.path != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath('file', file.path!),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('File data unavailable for ${file.name}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        continue;
+      }
+      
+      try {
+        final response = await request.send();
+        final responseData = await response.stream.bytesToString();
+
+        // Log the response
+        HttpLogger.logResponse(
+          http.Response(
+            responseData,
+            response.statusCode,
+            headers: response.headers,
+            request: request,
+          ),
+          duration: null,
+        );
+
+        // Update sessionid cookie from response headers if present
+        if (response.headers.containsKey('set-cookie')) {
+          final rawCookies = response.headers['set-cookie'];
+          if (rawCookies != null) {
+            final cookiesList = rawCookies.split(',');
+            for (var cookieString in cookiesList) {
+              final cookies = cookieString.split(';');
+              for (var cookie in cookies) {
+                if (cookie.trim().isNotEmpty) {
+                  final keyValue = cookie.trim().split('=');
+                  if (keyValue.length == 2) {
+                    final key = keyValue[0].trim();
+                    final value = keyValue[1].trim();
+                    if (key.toLowerCase() == 'sessionid') {
+                      SessionService.instance.cookies['sessionid'] = value;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        final parsedResponse = jsonDecode(responseData);
+
+        // Check if we received an updated session key
+        if (parsedResponse['session_key'] != null) {
+          await SessionService.instance.setSessionKey(parsedResponse['session_key']);
+        }
+
+        if (response.statusCode != 200) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to upload ${file.name}: ${response.statusCode}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error uploading ${file.name}: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _removeFile(int index) async {
+    final file = _selectedFiles[index];
+    
+    try {
+      // Make API call to delete the file
+      final uri = Uri.parse('http://192.168.1.205:8080/api/delete-file/');
+      
+      // Prepare headers with CSRF token
+      final headers = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (SessionService.instance.csrfToken != null) {
+        headers['X-CSRFToken'] = SessionService.instance.csrfToken!;
+      }
+      
+      // Prepare body with session key
+      final body = {
+        'filename': file.name,
+      };
+      
+      if (SessionService.instance.sessionKey != null) {
+        body['session_key'] = SessionService.instance.sessionKey!;
+      }
+      
+      // Create logging client and send request
+      final client = LoggingHttpClient(http.Client());
+      final response = await client.post(
+        uri,
+        headers: headers,
+        body: jsonEncode(body),
+      );
+      
+      if (response.statusCode == 200) {
+        // Parse response to check for updated session key
+        try {
+          final responseData = jsonDecode(response.body);
+          if (responseData['session_key'] != null) {
+            await SessionService.instance.setSessionKey(responseData['session_key']);
+          }
+        } catch (e) {
+          print('Error parsing delete response: $e');
+        }
+        
+        // Only remove from UI if deletion was successful on server
+        setState(() {
+          _selectedFiles.removeAt(index);
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('File ${file.name} deleted successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to delete file: ${response.statusCode}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error deleting file: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Future<void> _uploadFiles() async {
@@ -299,76 +522,80 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
       _isUploading = true;
     });
 
-    final processedDocs = <Map<String, dynamic>>[];
+    // Finalize uploads before navigating
     try {
-      for (final file in _selectedFiles) {
-        final uri = Uri.parse('http://192.168.1.205:8080/api/upload-file/');
-        final request = http.MultipartRequest('POST', uri);
-        if (file.bytes != null) {
-          // Web: use bytes
-          request.files.add(
-            http.MultipartFile.fromBytes(
-              'file',
-              file.bytes!,
-              filename: file.name,
-              contentType: MediaType('application', 'pdf'),
-            ),
-          );
-        } else if (file.path != null) {
-          // Mobile/Desktop: use path
-          request.files.add(
-            await http.MultipartFile.fromPath('file', file.path!),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('File data unavailable for ${file.name}'),
-              backgroundColor: Colors.red,
-            ),
-          );
-          continue;
-        }
-
-        // If CSRF token is needed, add it here:
-        // request.headers['X-CSRFToken'] = 'your_csrf_token';
-
-        final response = await request.send();
-        if (response.statusCode == 200) {
-          final respStr = await response.stream.bytesToString();
-          final respJson = respStr.isNotEmpty ? respStr : '{}';
-          final docData = respJson.isNotEmpty ? Map<String, dynamic>.from(jsonDecode(respJson)) : {};
-          processedDocs.add({
-            'filename': file.name,
-            'file_size': file.size,
-            ...docData,
-          });
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Failed to upload ${file.name}'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
+      final finalizeUri = Uri.parse('http://192.168.1.205:8080/api/finalize-uploads/');
+      
+      // Prepare headers with CSRF token
+      final headers = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (SessionService.instance.csrfToken != null) {
+        headers['X-CSRFToken'] = SessionService.instance.csrfToken!;
       }
-
-      setState(() {
-        _selectedFiles.clear();
-        _isUploading = false;
-      });
-
-      // Navigate to uploaded documents preview page, passing processedDocs
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => UploadedDocumentsPreviewPage(
-            uploadedFiles: processedDocs,
-          ),
-        ),
+      
+      // Prepare body with session key
+      final body = {};
+      
+      if (SessionService.instance.sessionKey != null) {
+        body['session_key'] = SessionService.instance.sessionKey!;
+      }
+      
+      // Create logging client and send request
+      final client = LoggingHttpClient(http.Client());
+      final response = await client.post(
+        finalizeUri,
+        headers: headers,
+        body: jsonEncode(body),
       );
+      
+      if (response.statusCode == 200) {
+        // Parse processed documents from the response
+        final List<Map<String, dynamic>> processedDocs = [];
+        try {
+          final responseData = jsonDecode(response.body);
+          
+          // Update session key if provided
+          if (responseData['session_key'] != null) {
+            await SessionService.instance.setSessionKey(responseData['session_key']);
+          }
+          
+          if (responseData['documents'] != null && responseData['documents'] is List) {
+            for (final doc in responseData['documents']) {
+              processedDocs.add(Map<String, dynamic>.from(doc));
+            }
+          }
+        } catch (e) {
+          print('Error parsing finalize response: $e');
+        }
+        
+        setState(() {
+          _selectedFiles.clear();
+          _isUploading = false;
+        });
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => UploadedDocumentsPreviewPage(
+              uploadedFiles: processedDocs,
+            ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to finalize uploads: ${response.statusCode}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        setState(() {
+          _isUploading = false;
+        });
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Upload failed: $e'),
+          content: Text('Finalize failed: $e'),
           backgroundColor: Colors.red,
         ),
       );
@@ -386,6 +613,26 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
   }
   @override
   Widget build(BuildContext context) {
+    if (_isInitializing) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(color: Color(0xFFFBB41D)),
+            SizedBox(height: 16),
+            Text(
+              "Initializing session...",
+              style: TextStyle(
+                fontFamily: 'SpaceGrotesk',
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    
     return Center(
       child: SingleChildScrollView(
         child: Padding(

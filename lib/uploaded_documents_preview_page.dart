@@ -3,6 +3,8 @@ import 'payment_page.dart';
 import 'appbar_drawer.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'services/session_service.dart';
+import 'services/http_logger.dart';
 
 class UploadedDocumentsPreviewPage extends StatefulWidget {
   final List<Map<String, dynamic>> uploadedFiles;
@@ -18,6 +20,18 @@ class UploadedDocumentsPreviewPage extends StatefulWidget {
 
 class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewPage> {
   bool _isLoading = false;
+  // Map to store references to document state controllers
+  final Map<String, _DocumentPreviewItemState> _documentStates = {};
+
+  // Method to register document state controllers
+  void _registerDocumentState(String fileName, _DocumentPreviewItemState state) {
+    _documentStates[fileName] = state;
+  }
+
+  // Method to get document state by fileName
+  _DocumentPreviewItemState? _getDocumentState(String fileName) {
+    return _documentStates[fileName];
+  }
 
   String _formatFileSize(int bytes) {
     if (bytes <= 0) return "0 B";
@@ -75,17 +89,96 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                       final i = entry.key;
                       final doc = entry.value;
                       return DocumentPreviewItem(
+                        key: ValueKey('doc-${doc['filename']}'),
                         fileName: doc['filename'] ?? '',
                         fileSize: _formatFileSize(doc['file_size'] ?? 0),
                         numPages: doc['num_pages']?.toString() ?? '-',
                         orientation: doc['orientation']?.toString() ?? '-',
                         paperSize: doc['paper_size']?.toString() ?? '-',
-                        onRemove: () {
-                          setState(() {
-                            widget.uploadedFiles.removeAt(i);
-                          });
-                          if (widget.uploadedFiles.isEmpty) {
-                            Navigator.of(context).pop(); // Go back to previous (main) page
+                        onRemove: () async {
+                          final filename = doc['filename'] ?? '';
+                          final docId = doc['doc_id'] ?? '';
+                          
+                          try {
+                            // Make API call to delete the file
+                            final uri = Uri.parse('http://192.168.1.205:8080/api/delete-file/');
+                            
+                            // Prepare headers with CSRF token
+                            final headers = {
+                              'Content-Type': 'application/json',
+                            };
+                            
+                            if (SessionService.instance.csrfToken != null) {
+                              headers['X-CSRFToken'] = SessionService.instance.csrfToken!;
+                            }
+                            
+                            // Prepare body with session key
+                            final body = {
+                              'filename': filename,
+                            };
+                            
+                            // Add doc_id if available
+                            if (docId.isNotEmpty) {
+                              body['doc_id'] = docId;
+                            }
+                            
+                            if (SessionService.instance.sessionKey != null) {
+                              body['session_key'] = SessionService.instance.sessionKey!;
+                            }
+                            
+                            // Create logging client and send request
+                            final client = LoggingHttpClient(http.Client());
+                            final response = await client.post(
+                              uri,
+                              headers: headers,
+                              body: jsonEncode(body),
+                            );
+                            client.close();
+                            
+                            if (response.statusCode == 200) {
+                              // Parse response for updated session key
+                              try {
+                                final responseData = jsonDecode(response.body);
+                                if (responseData['session_key'] != null) {
+                                  await SessionService.instance.setSessionKey(responseData['session_key']);
+                                }
+                              } catch (e) {
+                                print('Error parsing delete response: $e');
+                              }
+                              
+                              // Only update UI if deletion was successful
+                              setState(() {
+                                // Remove from document states map
+                                _documentStates.remove(filename);
+                                // Remove from uploadedFiles list
+                                widget.uploadedFiles.removeAt(i);
+                              });
+                              
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('File $filename deleted successfully'),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                              
+                              if (widget.uploadedFiles.isEmpty) {
+                                Navigator.of(context).pop(); // Go back to previous (main) page
+                              }
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Failed to delete file: ${response.statusCode}'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Error deleting file: $e'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
                           }
                         },
                       );
@@ -115,20 +208,97 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                                   setState(() {
                                     _isLoading = true;
                                   });
-                                  double totalAmount = 45.00;
-                                  await Future.delayed(const Duration(milliseconds: 600));
-                                  if (mounted) {
-                                    Navigator.of(context).pushReplacement(
-                                      MaterialPageRoute(
-                                        builder: (context) => PaymentPage(
-                                          uploadedFiles: widget.uploadedFiles,
-                                          totalAmount: totalAmount,
-                                        ),
-                                      ),
+                                  
+                                  // Get all document settings from the document preview items
+                                  try {
+                                    final List<Map<String, dynamic>> updatedSettings = [];
+                                    
+                                    // Find all DocumentPreviewItem widgets and get their settings
+                                    for (final doc in widget.uploadedFiles) {
+                                      final fileName = doc['filename'] ?? '';
+                                      // Find the key for this document
+                                      final docState = _getDocumentState(fileName);
+                                      if (docState != null) {
+                                        final payload = {
+                                          'filename': fileName,
+                                          'copies': docState.copies,
+                                          'pages_selection': docState.pagesSelection,
+                                          'orientation': docState.orientation,
+                                          'grayscale': docState.grayscale,
+                                          'paper_size': docState.paperSize,
+                                          'paper_quality': docState.paperQuality,
+                                        };
+                                        updatedSettings.add(payload);
+                                      }
+                                    }
+                                    
+                                    // Send all settings to the API
+                                    final url = Uri.parse('http://192.168.1.205:8080/api/update-document-settings/');
+                                    
+                                    // Prepare headers with CSRF token
+                                    final headers = {
+                                      'Content-Type': 'application/json',
+                                    };
+                                    
+                                    if (SessionService.instance.csrfToken != null) {
+                                      headers['X-CSRFToken'] = SessionService.instance.csrfToken!;
+                                    }
+                                    
+                                    // Prepare body with session key
+                                    final Map<String, dynamic> body = {
+                                      'documents': updatedSettings,
+                                    };
+                                    
+                                    if (SessionService.instance.sessionKey != null) {
+                                      body['session_key'] = SessionService.instance.sessionKey!;
+                                    }
+                                    
+                                    // Create logging client and send request
+                                    final client = LoggingHttpClient(http.Client());
+                                    final response = await client.post(
+                                      url,
+                                      headers: headers,
+                                      body: jsonEncode(body),
                                     );
-                                    setState(() {
-                                      _isLoading = false;
-                                    });
+                                    client.close();
+                                    
+                                    // Check for updated session key in the response
+                                    if (response.statusCode == 200) {
+                                      try {
+                                        final responseData = jsonDecode(response.body);
+                                        if (responseData['session_key'] != null) {
+                                          await SessionService.instance.setSessionKey(responseData['session_key']);
+                                        }
+                                      } catch (e) {
+                                        print('Error parsing settings update response: $e');
+                                      }
+                                    }
+                                    
+                                    if (response.statusCode != 200) {
+                                      throw Exception('Failed to update settings: ${response.statusCode}');
+                                    }
+                                    
+                                    double totalAmount = 45.00;
+                                    if (mounted) {
+                                      Navigator.of(context).pushReplacement(
+                                        MaterialPageRoute(
+                                          builder: (context) => PaymentPage(
+                                            uploadedFiles: widget.uploadedFiles,
+                                            totalAmount: totalAmount,
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+                                    );
+                                  } finally {
+                                    if (mounted) {
+                                      setState(() {
+                                        _isLoading = false;
+                                      });
+                                    }
                                   }
                                 },
                           style: ElevatedButton.styleFrom(
@@ -206,39 +376,33 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
   String paperQuality = "70 GSM (thinner)";
   bool isSaving = false;
 
-  Future<void> _saveSettings() async {
-    setState(() { isSaving = true; });
-    final url = Uri.parse('http://192.168.1.205:8080/api/update-document-settings/');
-    final payload = {
-      'filename': widget.fileName,
-      'copies': copies,
-      'pages_selection': pagesSelection,
-      'orientation': orientation,
-      'grayscale': grayscale,
-      'paper_size': paperSize,
-      'paper_quality': paperQuality,
-    };
-    try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(payload),
-      );
-      if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Settings updated!'), backgroundColor: Colors.green),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update: ${response.statusCode}'), backgroundColor: Colors.red),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
-      );
+  @override
+  void initState() {
+    super.initState();
+    
+    // Initialize default values from widget properties
+    if (widget.orientation.isNotEmpty && widget.orientation != '-') {
+      orientation = widget.orientation;
     }
-    setState(() { isSaving = false; });
+    if (widget.paperSize.isNotEmpty && widget.paperSize != '-') {
+      paperSize = widget.paperSize;
+    }
+  }
+  
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Register this state with parent after the widget is built
+    _registerWithParent();
+  }
+  
+  void _registerWithParent() {
+    // Find parent state and register
+    final ancestorState = context
+        .findAncestorStateOfType<_UploadedDocumentsPreviewPageState>();
+    if (ancestorState != null) {
+      ancestorState._registerDocumentState(widget.fileName, this);
+    }
   }
 
   @override
@@ -612,28 +776,7 @@ class _DocumentPreviewItemState extends State<DocumentPreviewItem> {
               },
             ),
           ),
-          const SizedBox(height: 8),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: isSaving ? null : _saveSettings,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                textStyle: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              child: isSaving
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                    )
-                  : const Text('Save Settings'),
-            ),
-          ),
+          // Removed Save Settings button as requested
         ],
       ),
     );
