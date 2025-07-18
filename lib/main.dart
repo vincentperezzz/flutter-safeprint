@@ -31,7 +31,7 @@ class _SampleAppState extends State<SampleApp> {
   int _selectedIndex = 0;
 
    List<Widget> get _pages => [
-    MediaUploadPage(),        // index 0
+    MediaUploadPage(onNavigate: _onItemTapped),        // index 0
     FeedbackFormPage(),       // index 1
     HelpPage(),               // index 2
     FAQPage(),                // index 3  
@@ -246,7 +246,9 @@ class _SampleAppState extends State<SampleApp> {
 }
 
 class MediaUploadPage extends StatefulWidget {
-  const MediaUploadPage({super.key});
+  final Function(int)? onNavigate;
+  
+  const MediaUploadPage({super.key, this.onNavigate});
   
   @override
   State<MediaUploadPage> createState() => _MediaUploadPageState();
@@ -698,12 +700,18 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
               ),
             ),
           ).then((result) {
-            // Check if we need to clear the previous files when returning
-            if (result != null && result is Map && result['clearPreviousFiles'] == true) {
-              setState(() {
-                _selectedFiles.clear();
-                _uploadedFileInfos.clear();
-              });
+            if (result != null && result is Map) {
+              // Check if we need to clear the previous files when returning
+              if (result['clearPreviousFiles'] == true) {
+                setState(() {
+                  _selectedFiles.clear();
+                  _uploadedFileInfos.clear();
+                });
+              }
+              // Check if we need to navigate to the feedback form
+              if (result['navigateToFeedback'] == true) {
+                widget.onNavigate?.call(1); // Navigate to feedback page
+              }
             }
           });
         } else {
@@ -723,12 +731,18 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
               ),
             ),
           ).then((result) {
-            // Check if we need to clear the previous files when returning
-            if (result != null && result is Map && result['clearPreviousFiles'] == true) {
-              setState(() {
-                _selectedFiles.clear();
-                _uploadedFileInfos.clear();
-              });
+            if (result != null && result is Map) {
+              // Check if we need to clear the previous files when returning
+              if (result['clearPreviousFiles'] == true) {
+                setState(() {
+                  _selectedFiles.clear();
+                  _uploadedFileInfos.clear();
+                });
+              }
+              // Check if we need to navigate to the feedback form
+              if (result['navigateToFeedback'] == true) {
+                widget.onNavigate?.call(1); // Navigate to feedback page
+              }
             }
           });
         }

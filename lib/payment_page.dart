@@ -90,22 +90,8 @@ class _PaymentPageState extends State<PaymentPage> {
   }
 
   void _sendFeedback() {
-    // Handle feedback submission
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Thank you!', style: TextStyle(fontFamily: 'SpaceGrotesk', fontWeight: FontWeight.w700)),
-          content: const Text('Your feedback has been sent.', style: TextStyle(fontFamily: 'SpaceGrotesk', fontWeight: FontWeight.w500)),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK', style: TextStyle(fontFamily: 'SpaceGrotesk')),
-            ),
-          ],
-        );
-      },
-    );
+    // Pop and return a result to navigate to the feedback form
+    Navigator.of(context).pop({'navigateToFeedback': true});
   }
 
   void _uploadAnotherDocument() {

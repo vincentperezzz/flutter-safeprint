@@ -559,7 +559,7 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                                       }
                                       
                                       if (mounted) {
-                                        Navigator.of(context).pushReplacement(
+                                        final result = await Navigator.of(context).push(
                                           MaterialPageRoute(
                                             builder: (context) => PaymentPage(
                                               uploadedFiles: documents,
@@ -568,6 +568,10 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                                             ),
                                           ),
                                         );
+
+                                        if (result != null && result is Map && result['navigateToFeedback'] == true) {
+                                          Navigator.of(context).pop({'navigateToFeedback': true});
+                                        }
                                       }
                                     } else {
                                       throw Exception('Confirmation response indicated failure');
