@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class FeedbackFormPage extends StatelessWidget {
   const FeedbackFormPage({super.key});
@@ -50,19 +51,73 @@ class FeedbackFormPage extends StatelessWidget {
   }
 }
 
-class FeedbackFormContent extends StatelessWidget {
+class FeedbackFormContent extends StatefulWidget {
   final String formType;
   const FeedbackFormContent({super.key, required this.formType});
 
   @override
+  State<FeedbackFormContent> createState() => _FeedbackFormContentState();
+}
+
+class _FeedbackFormContentState extends State<FeedbackFormContent> {
+  final _nameController = TextEditingController();
+  final _messageController = TextEditingController();
+  bool _isSubmitting = false;
+
+  Future<void> _submitFeedback() async {
+    setState(() => _isSubmitting = true);
+
+    // Log the feedback data
+    print('Submitting feedback:');
+    print('Category: ${widget.formType == 'Comments' ? 'Comment' : 'Report a Problem'}');
+    print('Name: ${_nameController.text}');
+    print('Message: ${_messageController.text}');
+
+    final url = Uri.parse('http://192.168.1.205:8080/feedback/');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: {
+        'category': widget.formType == 'Comments' ? 'Comment' : 'Report a Problem',
+        'name': _nameController.text,
+        'message': _messageController.text,
+      },
+    );
+    setState(() => _isSubmitting = false);
+
+    if (response.statusCode == 302 || response.statusCode == 200) {
+      // 302 is redirect after successful POST in Django
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Thank you!'),
+          content: const Text('Your feedback has been submitted.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      _nameController.clear();
+      _messageController.clear();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to submit feedback.')),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     String title;
-    if (formType == 'Comments') {
+    if (widget.formType == 'Comments') {
       title = 'Comment';
-    } else if (formType == 'Problems') {
+    } else if (widget.formType == 'Problems') {
       title = 'Report a Problem';
     } else {
-      title = formType;
+      title = widget.formType;
     }
 
     return Center(
@@ -93,6 +148,7 @@ class FeedbackFormContent extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 TextField(
+                  controller: _nameController,
                   decoration: const InputDecoration(
                     labelText: 'Name',
                     labelStyle: TextStyle(
@@ -110,6 +166,7 @@ class FeedbackFormContent extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 TextField(
+                  controller: _messageController,
                   decoration: const InputDecoration(
                     labelText: 'Your Message Here...',
                     labelStyle: TextStyle(
@@ -139,44 +196,10 @@ class FeedbackFormContent extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text(
-                          'Thank you!',
-                          style: TextStyle(
-                            fontFamily: 'SpaceGrotesk',
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        content: const Text(
-                          'Your feedback has been submitted.',
-                          style: TextStyle(
-                            fontFamily: 'SpaceGrotesk',
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black,
-                          ),
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: const Text(
-                              'OK',
-                              style: TextStyle(
-                                fontFamily: 'SpaceGrotesk',
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                  child: const Text('Submit'),
+                  onPressed: _isSubmitting ? null : _submitFeedback,
+                  child: _isSubmitting
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text('Submit'),
                 ),
               ],
             ),
