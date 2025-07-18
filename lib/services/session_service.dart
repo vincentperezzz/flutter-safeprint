@@ -4,6 +4,9 @@ import 'dart:convert';
 import 'package:html/parser.dart' show parse;
 import 'http_logger.dart';
 
+//SERVER IP ADDRESS
+const String serverIp = 'http://192.168.1.205:8080';
+
 class SessionService {
   static const String _csrfTokenKey = 'csrf_token';
   static const String _sessionKeyKey = 'session_key';
@@ -73,7 +76,7 @@ class SessionService {
     
     try {
       // Make a GET request to the homepage or any Django page
-      final uri = Uri.parse('http://192.168.1.205:8080/');
+      final uri = Uri.parse('$serverIp/');
       
       final response = await client.get(uri);
       

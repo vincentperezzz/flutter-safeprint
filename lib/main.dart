@@ -341,7 +341,7 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
     }
     
     for (final file in files) {
-      final uri = Uri.parse('http://192.168.1.205:8080/api/upload-file/');
+      final uri = Uri.parse('$serverIp/api/upload-file/');
       final request = http.MultipartRequest('POST', uri);
       
       // Add CSRF token header
@@ -467,7 +467,7 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
     
     try {
       // Make API call to delete the file
-      final uri = Uri.parse('http://192.168.1.205:8080/api/delete-file/');
+      final uri = Uri.parse('$serverIp/api/delete-file/');
       
       // Prepare headers with CSRF token
       final headers = {
@@ -556,7 +556,7 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
 
     // Finalize uploads before navigating
     try {
-      final finalizeUri = Uri.parse('http://192.168.1.205:8080/api/flutter-finalize-uploads/');
+      final finalizeUri = Uri.parse('$serverIp/api/flutter-finalize-uploads/');
       
       // Prepare headers with CSRF token
       final headers = {

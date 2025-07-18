@@ -233,7 +233,7 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                             }
                             
                             // Make API call to delete the file
-                            final uri = Uri.parse('http://192.168.1.205:8080/api/delete-file/');
+                            final uri = Uri.parse('$serverIp/api/delete-file/');
                             
                             // Prepare headers with CSRF token
                             final headers = {
@@ -431,7 +431,7 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                                     }
                                     
                                     // Send all settings to the API
-                                    final url = Uri.parse('http://192.168.1.205:8080/api/update-document-settings/');
+                                    final url = Uri.parse('$serverIp/api/update-document-settings/');
                                     
                                     // Prepare headers with CSRF token
                                     final headers = {
@@ -491,7 +491,7 @@ class _UploadedDocumentsPreviewPageState extends State<UploadedDocumentsPreviewP
                                     }
                                     
                                     // Step 2: Get final confirmation and pricing
-                                    final confirmUrl = Uri.parse('http://192.168.1.205:8080/api/flutter-confirmation/');
+                                    final confirmUrl = Uri.parse('$serverIp/api/flutter-confirmation/');
                                     
                                     final Map<String, dynamic> confirmBody = {};
                                     

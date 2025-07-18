@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'services/session_service.dart';
 
 class FeedbackFormPage extends StatelessWidget {
   const FeedbackFormPage({super.key});
@@ -73,7 +74,7 @@ class _FeedbackFormContentState extends State<FeedbackFormContent> {
     print('Name: ${_nameController.text}');
     print('Message: ${_messageController.text}');
 
-    final url = Uri.parse('http://192.168.1.205:8080/feedback/');
+    final url = Uri.parse('$serverIp/feedback/');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
