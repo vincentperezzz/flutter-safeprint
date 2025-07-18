@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'appbar_drawer.dart';
+import 'services/session_service.dart';
 
 class PaymentPage extends StatefulWidget {
   final List<Map<String, dynamic>> uploadedFiles;
@@ -108,8 +109,22 @@ class _PaymentPageState extends State<PaymentPage> {
   }
 
   void _uploadAnotherDocument() {
-    // Navigate back to upload page
-    Navigator.of(context).popUntil((route) => route.isFirst);
+
+    // Store the clear files flag in shared preferences
+    _storeClearFilesFlag().then((_) {
+      // Navigate back to the first route
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    });
+  }
+  
+  // Store a flag in SharedPreferences to clear files on next app load
+  Future<void> _storeClearFilesFlag() async {
+    try {
+      await SessionService.instance.setClearFilesFlag(true);
+      print('DEBUG: Set clear files flag in preferences');
+    } catch (e) {
+      print('ERROR: Could not set clear files flag: $e');
+    }
   }
 
   @override

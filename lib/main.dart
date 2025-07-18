@@ -12,12 +12,10 @@ import 'package:http_parser/http_parser.dart';
 import 'services/session_service.dart';
 import 'services/http_logger.dart';
 
-void main() async {
+void main() {
   // Ensure Flutter is initialized
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize session service
-  await SessionService.instance.loadFromStorage();
   
   runApp(const SampleApp());
 }
@@ -264,6 +262,20 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
   void initState() {
     super.initState();
     _initializeSession();
+    
+    // Check if we should clear files based on the shared preferences flag
+    _checkClearFilesFlag();
+  }
+  
+  Future<void> _checkClearFilesFlag() async {
+    final shouldClear = await SessionService.instance.shouldClearFiles();
+    if (shouldClear && mounted) {
+      setState(() {
+        _selectedFiles.clear();
+        _uploadedFileInfos.clear();
+      });
+      print('DEBUG: Cleared files based on session flag');
+    }
   }
   
   Future<void> _initializeSession() async {

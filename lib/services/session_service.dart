@@ -9,6 +9,7 @@ class SessionService {
   static const String _sessionKeyKey = 'session_key';
   static const String _sessionIdCookieKey = 'sessionid';
   static const String _csrfCookieKey = 'csrftoken';
+  static const String _clearFilesKey = 'clear_files';
   
   static SessionService? _instance;
   
@@ -31,12 +32,15 @@ class SessionService {
   
   // Generate a UUID string for consistent session keys
   String _generateUUID() {
-    // Simple implementation since we can't import uuid package directly
     // This creates a timestamp-based pseudo-UUID
-    final now = DateTime.now().microsecondsSinceEpoch;
-    final random = now.toString() + DateTime.now().millisecond.toString();
-    final hexString = random.hashCode.toRadixString(16).padLeft(8, '0');
-    return '${hexString.substring(0, 8)}-${hexString.substring(0, 4)}-${hexString.substring(0, 4)}-${hexString.substring(0, 4)}-${hexString.substring(0, 12)}';
+    final now = DateTime.now();
+    final part1 = now.microsecondsSinceEpoch.toRadixString(16).padLeft(12, '0');
+    final part2 = (now.millisecond * 1000 + now.microsecond).toRadixString(16).padLeft(5, '0');
+    
+    // Combine parts to form a UUID-like structure
+    final hexString = '$part1$part2'.padRight(32, '0');
+    
+    return '${hexString.substring(0, 8)}-${hexString.substring(8, 12)}-${hexString.substring(12, 16)}-${hexString.substring(16, 20)}-${hexString.substring(20, 32)}';
   }
 
   // Load from storage on app start
@@ -249,5 +253,25 @@ class SessionService {
     }
     
     return request;
+  }
+  
+  // Set a flag to clear files on next app start
+  Future<void> setClearFilesFlag(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_clearFilesKey, value);
+    print('DEBUG: Set clear files flag to $value');
+  }
+  
+  // Check if files should be cleared
+  Future<bool> shouldClearFiles() async {
+    final prefs = await SharedPreferences.getInstance();
+    final shouldClear = prefs.getBool(_clearFilesKey) ?? false;
+    
+    // Reset the flag once read
+    if (shouldClear) {
+      await prefs.setBool(_clearFilesKey, false);
+    }
+    
+    return shouldClear;
   }
 }
