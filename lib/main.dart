@@ -674,6 +674,7 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
         
         setState(() {
           _selectedFiles.clear();
+          _uploadedFileInfos.clear();
           _isUploading = false;
         });
         
@@ -1095,9 +1096,9 @@ class _MediaUploadPageState extends State<MediaUploadPage> {
             ),
           ),
         ),
-      ),
+      )
     );
-  }
+    }
 }
 
 class DottedBorderBox extends StatelessWidget {
