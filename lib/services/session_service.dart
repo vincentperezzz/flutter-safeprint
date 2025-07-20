@@ -5,7 +5,7 @@ import 'package:html/parser.dart' show parse;
 import 'http_logger.dart';
 
 //SERVER IP ADDRESS
-const String serverIp = 'http://172.18.128.1:8080';
+const String serverIp = 'http://172.20.10.2:8080';
 
 class SessionService {
   static const String _csrfTokenKey = 'csrf_token';
