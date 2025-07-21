@@ -66,6 +66,23 @@ class _FeedbackFormContentState extends State<FeedbackFormContent> {
   bool _isSubmitting = false;
 
   Future<void> _submitFeedback() async {
+    if (_nameController.text.trim().isEmpty || _messageController.text.trim().isEmpty) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Textbox is empty'),
+          content: const Text('Please fill in both Name and Message fields.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
     setState(() => _isSubmitting = true);
 
     // Log the feedback data
